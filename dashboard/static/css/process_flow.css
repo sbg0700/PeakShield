@@ -1,0 +1,36 @@
+/* 공정 흐름 박스 애니메이션 및 스타일 */
+.process-container {
+    padding: 20px 0;
+    overflow-x: auto;
+}
+.process-track {
+    display: flex;
+    align-items: center;
+    min-width: max-content;
+}
+.process-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    width: 240px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.process-box:hover {
+    border-color: #22d3ee;
+    transform: translateY(-8px);
+}
+.arrow-line {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #22d3ee 0%, transparent 100%);
+    position: relative;
+}
+.arrow-dot {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #22d3ee;
+    border-radius: 50%;
+    top: -2px;
+}

@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>공정 통합 모니터링 시스템</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_1.css') }}">
+  <link rel="icon" href="data:,">
+
+  <style>
+    /* ============================================
+       [SECTION: 공정 흐름(Digital Twin) 전용 스타일]
+       ============================================ */
+    #twinStage {
+      display: flex;
+      width: 100%;
+      height: 600px;
+      overflow: hidden;
+      background: #020617;
+      border-radius: 1rem 1rem 0 0;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    #twinMapContainer {
+      flex: 1 1 auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: 0;
+    }
+
+    .factory-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .map-relative-area {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      max-height: 100%;
+      aspect-ratio: 16 / 9;
+    }
+
+    .parameter-card {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      z-index: 30;
+      min-width: 140px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      transition: all 0.3s ease;
+    }
+
+    .card-cyan { border: 1px solid rgba(34, 211, 238, 0.5); box-shadow: 0 0 15px rgba(34, 211, 238, 0.2); }
+    .card-indigo { border: 1px solid rgba(129, 140, 248, 0.5); box-shadow: 0 0 15px rgba(129, 140, 248, 0.2); }
+    .card-emerald { border: 1px solid rgba(52, 211, 153, 0.5); box-shadow: 0 0 15px rgba(52, 211, 153, 0.2); }
+
+    #twinSidebar {
+      width: 0;
+      background: rgba(15, 23, 42, 0.98);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 40;
+    }
+
+    #twinStage.sidebar-open #twinSidebar { width: 400px; }
+
+    #resizer {
+      position: absolute;
+      left: -4px;
+      top: 0;
+      width: 12px;
+      height: 100%;
+      cursor: col-resize;
+      z-index: 100;
+      background: transparent;
+    }
+    #resizer:hover { background: rgba(34, 211, 238, 0.2); }
+
+    .accordion-item { transition: all 0.3s ease; border-left: 4px solid transparent; }
+    .accordion-item.active-cyan { border-left-color: #22d3ee; box-shadow: inset 10px 0 20px -10px rgba(34, 211, 238, 0.2); }
+    .accordion-item.active-indigo { border-left-color: #818cf8; box-shadow: inset 10px 0 20px -10px rgba(129, 140, 248, 0.2); }
+    .accordion-item.active-emerald { border-left-color: #34d199; box-shadow: inset 10px 0 20px -10px rgba(52, 211, 153, 0.2); }
+
+    .accordion-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease; }
+    .accordion-item.active .accordion-content { max-height: 300px; opacity: 1; margin-top: 1rem; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    #accordionContainer:hover::-webkit-scrollbar-thumb { background: #334155; }
+
+    .resizing { cursor: col-resize; user-select: none; }
+    section[data-view] { display: none; }
+    section[data-view].active { display: block; }
+
+    /* ============================================
+       [SECTION: 알람 시스템]
+       ============================================ */
+    #alarmPanel {
+      width: 100%;
+      height: 180px;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: none;
+      border-radius: 0 0 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 10;
+    }
+
+    @keyframes bell-ring {
+      0%, 100% { transform: rotate(0); }
+      20% { transform: rotate(15deg); }
+      40% { transform: rotate(-15deg); }
+      60% { transform: rotate(10deg); }
+      80% { transform: rotate(-10deg); }
+    }
+
+    .bell-active {
+      animation: bell-ring 0.6s ease-in-out infinite;
+      display: inline-block;
+      transform-origin: top center;
+    }
+
+    .alarm-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+
+<body class="p-6 "> <!---------  bg-[#020617] -------->
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-black tracking-tight">공정 통합 모니터링 시스템</h1>
+        <p class="text-slate-400 mt-1 italic tracking-widest text-xs">● LIVE PROCESS MONITORING</p>
+      </div>
+      <div class="flex gap-2">
+         <button id="btn-report" class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-sm">Report</button>
+		 <button id="btn-export" class="px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black hover:bg-cyan-400 transition-all text-sm">Export Data</button>
+		 <button id="themeToggle"
+        class="w-10 h-10 flex items-center justify-center rounded-xl
+               bg-white/10 border border-white/10
+               hover:border-cyan-300/40 transition"
+        aria-label="Toggle theme">
+        <span id="themeIcon">🌙</span>
+      </button>
+      </div>
+    </div>
+
+    <div class="tabs-wrap w-full">
+      <button class="tab-btn" data-tab="energy" data-active="true">⚡ 전기료 분석</button>
+      <button class="tab-btn" data-tab="process" data-active="false">📉 공정 흐름</button>
+      <button class="tab-btn" data-tab="co2" data-active="false">🌿 CO2</button>
+    </div>
+	
+	
+	<!-- =========================
+         VIEW 1) 전기료 분석
+         ========================= -->
+     <section data-view="energy" class="active space-y-4">
+
+      <!-- [Row 1] 차트 + PSI 게이지 -->
+      <div class="grid gap-4 lg:grid-cols-[1fr_360px] items-stretch">
+
+        <!-- 시간대별 전기료 추이 (왼쪽) -->
+        <div class="soft-card p-6 min-w-0">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-black">시간대별 전기사용량 전기요금 추이</h2>
+          </div>
+
+          <div class="h-[300px] xl:h-[340px] 2xl:h-[380px]">
+            <canvas id="costTrend"></canvas>
+          </div>
+        </div>
+
+        <!-- PSI Group (오른쪽) : 부모 1개 + BEFORE/AFTER 2섹션 -->
+        <div class="min-w-0">
+          <div class="soft-card p-6 psi-group">
+
+            <!-- 부모 헤더 -->
+            <div class="psi-group-head">
+              <div class="psi-group-title">
+                <h2 class="psi-title">공정 스트레스 지표</h2>
+
+                <!-- ? tooltip (부모로 올림) -->
+                <div class="psi-help" tabindex="0" aria-label="공정 스트레스 지표 설명">
+                  <span class="psi-help-icon">?</span>
+
+                  <div class="psi-tooltip" role="tooltip">
+                    <div class="psi-tooltip-title">공정 스트레스 지표(PSI)</div>
+                    <div class="psi-tooltip-body">
+                      전력 사용 패턴의 <b>급변</b>, <b>역률 이탈</b>, <b>무효전력 부담</b>을 종합해
+                      공정이 얼마나 불안정하게 운전되는지 <b>0~100</b>으로 표시합니다.
+                      <div class="psi-tooltip-sub">0 안정 · 100 과부하/불안정</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BEFORE -->
+            <div class="psi-block" data-psi-block="before">
+              <div class="psi-block-head">
+                <div class="psi-block-left">
+                  <div class="psi-block-label">최적화 이전</div>
+                </div>
+
+                <!-- ✅ 우측 상단: 상태(바늘색 배경) + 수치 -->
+                <div class="psi-block-right">
+                  <span class="psi-badge" data-psi-badge="before">-</span>
+                  <span class="psi-topval" data-psi-value="before">- PSI</span>
+                </div>
+              </div>
+
+              <div class="psi-gauge-wrap">
+                <svg class="psi-gauge" data-psi-gauge="before"
+                     viewBox="0 0 220 140" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <linearGradient id="psiGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%"   stop-color="#22c55e"/>
+                      <stop offset="50%"  stop-color="#facc15"/>
+                      <stop offset="75%"  stop-color="#fb923c"/>
+                      <stop offset="100%" stop-color="#ef4444"/>
+                    </linearGradient>
+                  </defs>
+
+                  <!-- 배경 트랙 -->
+                  <path class="psi-track" d="M20 120 A90 90 0 0 1 200 120"
+                        fill="none" stroke-width="12" stroke-linecap="round"/>
+
+                  <!-- 컬러 프로그레스 호 (바늘 대신 호가 찬다) -->
+                  <path class="psi-progress" data-psi-progress="before"
+                        d="M20 120 A90 90 0 0 1 200 120"
+                        fill="none" stroke="url(#psiGrad)"
+                        stroke-width="12" stroke-linecap="round"
+                        opacity="0.95"
+                        stroke-dasharray="565"
+                        stroke-dashoffset="565"/>
+
+                  <!-- 중앙 원형 배경 -->
+                  <circle cx="110" cy="120" r="20"
+                          fill="rgba(15, 23, 42, 0.9)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                  <!-- 중앙 텍스트 정보 -->
+                  <text x="110" y="120" text-anchor="middle" dominant-baseline="middle"
+                        class="psi-text"
+                        font-size="28" font-weight="900"
+                        fill="var(--psi-text)"
+                        data-psi-text="before">0</text>
+
+                  <!-- 라벨 -->
+                  <text x="18"  y="138" class="psi-subtext" font-size="10" font-weight="700" fill="var(--psi-subtext)">0</text>
+                  <text x="192" y="138" class="psi-subtext" font-size="10" font-weight="700" fill="var(--psi-subtext)">100</text>
+                </svg>
+              </div>
+            </div>
+
+            <!-- AFTER -->
+            <div class="psi-block" data-psi-block="after">
+              <div class="psi-block-head">
+                <div class="psi-block-left">
+                  <div class="psi-block-label">최적화 이후</div>
+                </div>
+
+                <div class="psi-block-right">
+                  <span class="psi-badge" data-psi-badge="after">-</span>
+                  <span class="psi-topval" data-psi-value="after">- PSI</span>
+                </div>
+              </div>
+
+              <div class="psi-gauge-wrap">
+                <svg class="psi-gauge" data-psi-gauge="after"
+                     viewBox="0 0 220 140" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <linearGradient id="psiGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%"   stop-color="#22c55e"/>
+                      <stop offset="50%"  stop-color="#facc15"/>
+                      <stop offset="75%"  stop-color="#fb923c"/>
+                      <stop offset="100%" stop-color="#ef4444"/>
+                    </linearGradient>
+                  </defs>
+
+                  <!-- 배경 트랙 -->
+                  <path class="psi-track" d="M20 120 A90 90 0 0 1 200 120"
+                        fill="none" stroke-width="12" stroke-linecap="round"/>
+
+                  <!-- 컬러 프로그레스 호 (바늘 대신 호가 찬다) -->
+                  <path class="psi-progress" data-psi-progress="after"
+                        d="M20 120 A90 90 0 0 1 200 120"
+                        fill="none" stroke="url(#psiGrad2)"
+                        stroke-width="12" stroke-linecap="round"
+                        opacity="0.95"
+                        stroke-dasharray="565"
+                        stroke-dashoffset="565"/>
+
+                  <!-- 중앙 원형 배경 -->
+                  <circle cx="110" cy="120" r="20"
+                          fill="rgba(15, 23, 42, 0.9)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                  <!-- 중앙 텍스트 정보 -->
+                  <text x="110" y="120" text-anchor="middle" dominant-baseline="middle"
+                        class="psi-text"
+                        font-size="28" font-weight="900"
+                        fill="var(--psi-text)"
+                        data-psi-text="after">0</text>
+
+                  <!-- 라벨 -->
+                  <text x="18"  y="138" class="psi-subtext" font-size="10" font-weight="700" fill="var(--psi-subtext)">0</text>
+                  <text x="192" y="138" class="psi-subtext" font-size="10" font-weight="700" fill="var(--psi-subtext)">100</text>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+                <!-- [Row 2] 카드들 -->
+                <div class="energy-glow-area">
+				  <div class="grid gap-4 lg:grid-cols-2 items-stretch">
+
+					<div class="glow-card kpi-cyan p-6">
+					  <div class="flex items-start justify-between">
+						<div>
+						  <div class="text-sm text-white/70 font-bold">이번 달 누적 전기료</div>
+						  <div class="text-4xl font-black mt-2 neon-value whitespace-nowrap">
+							<span id="realtime-accumulated-cost">{{ current_cost | fmt }}</span>
+							<span class="text-xl ml-1 text-white/80">원</span>
+						  </div>
+						</div>
+						<div class="bg-white/10 p-3 rounded-2xl">⚡</div>
+					  </div>
+
+					  <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+						<div class="text-sm font-bold text-white/80">
+						  전월 대비
+						  <span class="font-black text-white">
+							{% if is_increase %}+{% endif %}{{ change_percentage | round(1) }}%
+						  </span>
+						</div>
+
+						<div class="text-right">
+						  <div class="text-xs text-white/60 font-bold">이번 달 절감 가능액</div>
+						  <div class="font-black text-white" id="realtime-potential-savings">
+							{{ potential_savings | fmt }} 원
+						  </div>
+						</div>
+					  </div>
+
+					  <div class="mt-5 pt-4 border-t border-white/10">
+						<div class="flex items-center justify-between mb-2">
+						  <div class="text-sm font-black text-white">이번 달 예측 전기료</div>
+						  <div class="text-xs text-white/50">최적화 전 vs 최적화 후</div>
+						</div>
+						<div class="h-[90px] chart-glow">
+						  <canvas id="monthlyForecastBar"></canvas>
+						</div>
+					  </div>
+					</div>
+
+					<div class="glow-card p-6">
+					  <div class="flex items-center justify-between mb-3">
+						<h2 class="text-xl font-black monthly-title">월별 전기료 추이</h2>
+						<span class="text-sm monthly-sub font-bold">1~12월</span>
+					  </div>
+					  <div class="h-[240px] xl:h-[300px] 2xl:h-[340px] flex flex-col min-h-0">
+						<canvas id="monthlyCostTrend" class="flex-1"></canvas>
+					  </div>
+					</div>
+
+				  </div>
+				</div>
+
+    </section>
+	<!-- =========================
+         VIEW 2) 공정 흐름
+         ========================= -->
+	<section data-view="process" class="space-y-0">
+      <div id="twinStage">
+        <div id="twinMapContainer">
+          <div class="factory-wrapper">
+            <div class="map-relative-area">
+              <img class="h-full w-auto object-contain opacity-40" src="{{ url_for('static', filename='img/process_map.png') }}" alt="factory">
+
+              <div id="card-stage-1" class="parameter-card card-cyan" style="top: 15%; left: 12%;" onclick="toggleControl('stage-1')">
+                <div class="flex justify-between text-[10px] font-bold text-cyan-400 mb-1">
+                  <span>STAGE 01</span><span class="animate-pulse">● LIVE</span>
+                </div>
+                <div class="text-white font-black text-2xl tabular-nums" id="val-stage-1">-</div>
+                <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Iron Ore Feed (ton/h)</div>
+              </div>
+
+              <div id="card-stage-2" class="parameter-card card-indigo" style="top: 42%; left: 48%;" onclick="toggleControl('stage-2')">
+                <div class="flex justify-between text-[10px] font-bold text-indigo-400 mb-1">
+                  <span>STAGE 02</span><span class="animate-pulse">● LIVE</span>
+                </div>
+                <div class="text-white font-black text-2xl tabular-nums" id="val-stage-2">-</div>
+                <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Furnace Temp (°C)</div>
+              </div>
+
+              <div id="card-stage-3" class="parameter-card card-emerald" style="top: 58%; left: 72%;" onclick="toggleControl('stage-3')">
+                <div class="flex justify-between text-[10px] font-bold text-emerald-400 mb-1">
+                  <span>STAGE 03</span><span class="animate-pulse">● LIVE</span>
+                </div>
+                <div class="text-white font-black text-2xl tabular-nums" id="val-stage-3">-</div>
+                <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Motor Rate (%)</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <aside id="twinSidebar">
+          <div id="resizer"></div>
+          <div class="p-6 border-b border-slate-800 flex justify-between items-start min-w-[320px] bg-slate-900 text-white z-50">
+            <div>
+              <h3 class="font-bold text-sm tracking-widest uppercase">System Config</h3>
+              <button onclick="clearAllStages()" class="text-[9px] text-slate-500 hover:text-red-400 font-bold mt-1 transition-colors">RESET ALL PANELS</button>
+            </div>
+            <button onclick="closeSidebar()" class="text-slate-400 hover:text-white p-2 -mr-2 transition-transform hover:rotate-90">✕</button>
+          </div>
+          <div id="accordionContainer" class="flex-1 overflow-y-auto p-4 space-y-4 min-w-[320px] custom-scrollbar"></div>
+        </aside>
+      </div>
+
+      <div id="alarmPanel">
+        <div class="alarm-header px-5 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span id="alarmBell" class="text-amber-500 text-lg">🔔</span>
+            <h4 class="text-white font-bold text-xs uppercase tracking-widest">System Log & Alerts</h4>
+          </div>
+          <div class="flex items-center gap-4">
+            <span id="alarmStatus" class="text-[10px] text-emerald-500 font-bold tracking-tighter animate-pulse">● SYSTEM NORMAL</span>
+            <span id="alarmCount" class="text-[10px] text-slate-500 font-mono">0 events</span>
+          </div>
+        </div>
+        <div id="alarmList" class="custom-scrollbar p-4 flex-1 overflow-y-auto">
+          <div id="emptyMsg" class="h-full flex items-center justify-center">
+            <p class="text-slate-600 text-xs italic tracking-tight">No critical alerts detected...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="reportPanel" class="hidden mt-8 p-8 bg-slate-900 border-t-4 border-cyan-500 rounded-b-xl shadow-2xl transition-all relative z-50">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+          <h2 class="text-2xl font-black text-white">⚙️ AI 공정 시뮬레이션 리포트</h2>
+          <span id="reportTime" class="text-slate-400 font-mono text-sm"></span>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-6 mb-6">
+          <div class="p-4 bg-black/40 rounded-lg">
+            <div class="text-xs text-slate-400 font-bold mb-1">예측 전력 사용량</div>
+            <div id="rep-usage" class="text-2xl font-black text-white">0 kWh</div>
+          </div>
+          <div class="p-4 bg-black/40 rounded-lg">
+            <div class="text-xs text-slate-400 font-bold mb-1">예상 공정 스트레스 (PSI)</div>
+            <div id="rep-psi" class="text-2xl font-black text-cyan-400">0</div>
+          </div>
+          <div class="p-4 bg-black/40 rounded-lg">
+            <div class="text-xs text-slate-400 font-bold mb-1">CO2 저감 효과</div>
+            <div id="rep-co2" class="text-2xl font-black text-emerald-400">0 kg</div>
+          </div>
+        </div>
+        
+        <div class="bg-slate-800/50 p-6 rounded-lg">
+          <h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-widest flex items-center gap-2">
+            <span class="text-cyan-400">💡</span> AI Expert Insights
+          </h3>
+          <ul id="rep-insights" class="text-slate-300 text-sm space-y-2 leading-relaxed">
+            </ul>
+        </div>
+      </div>
+    </section>
+    <!-- =========================
+         VIEW 3) CO2
+         ========================= -->
+    <section data-view="co2" class="space-y-4">
+
+      <!-- [Row 1] 전기료 분석 탭 Row1 레이아웃 그대로: (왼쪽 1fr) + (오른쪽 360px) -->
+      <div class="grid gap-4 lg:grid-cols-[1fr_360px] items-stretch">
+
+        <!-- LEFT: (전기료의 '시간대별 전기료 추이' 같은 큰 카드 자리) -->
+        <div class="soft-card p-6 min-w-0">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold tracking-tight">
+              월별 탄소비용 추이
+            </h3>
+
+            <div class="flex items-center gap-2">
+              <span id="co2TrendYoY"
+                    class="text-xs px-2 py-1 rounded-full
+                           border transition-all">
+              </span>
+
+              <span class="text-xs px-2 py-1 rounded-full
+                           bg-emerald-500/10 text-emerald-400
+                           border border-emerald-500/20">
+                2018 Monthly
+              </span>
+            </div>
+          </div>
+
+
+          <div class="h-[300px] xl:h-[340px] 2xl:h-[380px]">
+            <canvas id="costTrendCO2"></canvas>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: (전기료 탭의 공정 스트레스 패널과 동일한 “2단 카드” 자리) -->
+        <div class="soft-card p-6 min-w-0">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-black">배출권(ETS) 패널</h2>
+            <span class="muted text-sm">KAU25</span>
+          </div>
+
+          <!-- TOP BLOCK -->
+          <div class="ets-board relative rounded-2xl p-4 border border-white/10 overflow-hidden">
+
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <div class="text-xs tracking-widest text-white/60 font-black">KRX · K-ETS</div>
+                  <span class="inline-flex items-center gap-2 text-xs font-black text-white/70">
+                    <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                    LIVE
+                  </span>
+                </div>
+
+                <div class="mt-1 text-2xl font-black text-white">KAU25</div>
+              </div>
+
+              <div class="text-xs px-2 py-1 rounded-full border border-white/10 text-white/70">
+                Monthly Close
+              </div>
+            </div>
+
+            <div class="mt-4 flex items-end gap-3">
+              <div id="kau25BoardPrice" class="text-6xl font-black text-white leading-none tracking-tight">-</div>
+              <div id="kau25BoardUnit" class="text-lg font-black text-white/70 mb-1">원</div>
+            </div>
+
+            <div class="mt-3 flex items-center gap-3">
+              <div id="kau25BoardChange"
+                   class="krx-mom text-sm font-black px-2 py-1 rounded-xl border tabular-nums">
+                <span class="krx-tri-spin" aria-hidden="true"></span>
+                <span class="krx-mom-text">-</span>
+              </div>
+            </div>
+
+            <!-- ✅ 우측 하단 현재시간 -->
+            <div id="etsNowTime" class="absolute bottom-3 right-4 text-xs text-white/70 font-semibold tracking-wide">
+              --:--
+            </div>
+
+            <!-- ✅ 배출권 시세 Ticker Strip (무한 스크롤) -->
+            <div class="krx-ticker mt-4">
+              <div class="krx-ticker__fade krx-ticker__fade--l"></div>
+              <div class="krx-ticker__fade krx-ticker__fade--r"></div>
+              <div class="krx-ticker__track" id="etsTickerTrack"></div>
+            </div>
+
+          </div>
+
+          <!-- BOTTOM BLOCK: ✅ 네가 체크한 ‘최적화 이후’ 카드 자리 = 여기 차트 들어감 -->
+          <div class="psi-block co2-psi-like mt-4">
+            <div class="psi-block-head">
+              <div class="psi-block-left">
+                <div class="psi-block-label">KAU25 월별 추이</div>
+              </div>
+              <div class="psi-block-right">
+                <span class="psi-badge">월봉</span>
+                <span class="psi-topval" id="kau25MoM">-</span>
+              </div>
+            </div>
+
+            <!-- ✅ 차트 캔버스: 전기료 탭 ‘시간대별 전기료 추이’와 같은 방식(라인차트) -->
+            <div class="mt-3 h-[170px]">
+              <canvas id="kau25MonthlyClose"></canvas>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+	
+  </div>
+  
+  <script>
+    // 1. 월간 차트가 사용하는 변수명으로 정확히 매칭
+	window.MONTHLY_HUMAN_DATA = {{ monthly_human_data | tojson }};
+	window.MONTHLY_AI_DATA = {{ monthly_ai_data | tojson }};
+	  
+	// 2. 만약 JS 파일 내부에서 MONTHLY_COSTS라는 이름을 쓰고 있다면 아래 줄도 추가
+	window.MONTHLY_COSTS = window.MONTHLY_HUMAN_DATA; 
+
+	// 3. 실시간 추이 초기 데이터
+	window.COST_TREND_DATA = {{ cost_trend_data | tojson }};
+  </script>
+  
+  <script src="{{ url_for('static', filename='js/psi_gauge_1.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/tabs_and_twin.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cost_trend.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/monthly_cost_charts_1.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/kau25_monthly_chart_1.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/co2_monthly_2018.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/co2_trend_1.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/ets_ticker_1.js') }}"></script>
+  
+  <script>
+    // HTML 내부에는 '페이지 전용' 유틸리티 로직만 남깁니다.
+    // 핵심 로직(SSE, 차트 흐름)은 tabs_and_twin.js에서 실행됩니다.
+
+    let bellTimer = null;
+
+    // 실시간 알람 트리거 함수
+    function triggerAlarm(name, val, unit) {
+      const list = document.getElementById('alarmList');
+      const emptyMsg = document.getElementById('emptyMsg');
+      if (emptyMsg) emptyMsg.remove();
+
+      const bell = document.getElementById('alarmBell');
+      if (bell) {
+        bell.classList.add('bell-active');
+        if (bellTimer) clearTimeout(bellTimer);
+        bellTimer = setTimeout(() => {
+          bell.classList.remove('bell-active');
+          bellTimer = null;
+        }, 3000);
+      }
+
+      const statusLabel = document.getElementById('alarmStatus');
+      statusLabel.innerText = "● ATTENTION REQUIRED";
+      statusLabel.classList.replace('text-emerald-500', 'text-amber-500');
+
+      const time = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+      const item = document.createElement('div');
+      item.className = "alarm-item";
+      item.innerHTML = `
+        <span class="text-slate-500 font-mono text-[10px] w-20">${time}</span>
+        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">WARNING</span>
+        <span class="text-slate-300 text-[11px] font-medium italic">High status in <b class="text-white">${name}</b>: ${val}${unit}</span>`;
+
+      list.prepend(item);
+      if (list.children.length > 10) list.lastElementChild.remove();
+      document.getElementById('alarmCount').innerText = `${list.children.length} events logged`;
+    }
+
+    /* 사이드바 리사이징 로직 (기타 UI 제어용) */
+    const resizer = document.getElementById('resizer');
+    const sidebar = document.getElementById('twinSidebar');
+    const twinStage = document.getElementById('twinStage');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.classList.add('resizing');
+      sidebar.style.transition = 'none';
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const stageRect = twinStage.getBoundingClientRect();
+      const newWidth = stageRect.right - e.clientX;
+      if (newWidth > 300 && newWidth < stageRect.width * 0.8) {
+        sidebar.style.width = `${newWidth}px`;
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isResizing = false;
+      document.body.classList.remove('resizing');
+      sidebar.style.transition = 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+
+    // Flask에서 데이터를 정상 수신 중인지 확인하는 로그
+    console.log("Initial Cost Data Loaded:", window.COST_TREND_DATA);
+  </script>
+</body>
+</html>

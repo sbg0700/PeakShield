@@ -1,0 +1,1052 @@
+:root{
+  --accent:#00e5ff;
+  --bg:#05060b;
+  --panel:rgba(22, 26, 42, 0.92);
+  --card:rgba(255,255,255,0.05);
+  --stroke:rgba(255,255,255,0.10);
+  --muted:#a1a1aa;
+
+  /* PSI theme tokens */
+  --psi-text: rgba(235,245,255,0.92);
+  --psi-subtext: rgba(156,163,175,0.90);
+  --psi-track: rgba(255,255,255,0.10);
+  --psi-center-fill: rgba(0,0,0,0.55);
+}
+
+html[data-theme="light"]{
+  --psi-text: rgba(15,23,42,0.90);
+  --psi-subtext: rgba(15,23,42,0.55);
+  --psi-track: rgba(15,23,42,0.10);
+  --psi-center-fill: rgba(15,23,42,0.06);
+}
+
+
+
+body{
+  background: var(--bg);
+  color:#e5e7eb;
+}
+
+.muted{ color: var(--muted); }
+
+.soft-card{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+
+/* =========================================
+   공정 카드: 데스크탑(큰 화면) 1x4 고정
+========================================= */
+.proc-scroll{
+  overflow: visible;     /* 큰 화면은 스크롤 안 씀 */
+}
+
+.proc-row{
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 1x4 고정 */
+}
+
+.proc-item{
+  min-width: 0;
+}
+
+/* 화면 좁아지면 2열 → 1열 */
+@media (max-width: 1200px){
+  .proc-row{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px){
+  .proc-row{ grid-template-columns: 1fr; }
+}
+
+
+
+body{
+  background: var(--bg);
+  color:#e5e7eb;
+}
+
+.muted{ color: var(--muted); }
+
+.soft-card{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+
+/* =========================================
+   공정 카드: 데스크탑(큰 화면) 1x4 고정
+========================================= */
+.proc-scroll{
+  overflow: visible;     /* 큰 화면은 스크롤 안 씀 */
+}
+
+.proc-row{
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 1x4 고정 */
+}
+
+.proc-item{
+  min-width: 0;
+}
+
+/* 화면 좁아지면 2열 → 1열 */
+@media (max-width: 1200px){
+  .proc-row{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px){
+  .proc-row{ grid-template-columns: 1fr; }
+}
+
+/* =========================================
+   Tabs 스타일
+========================================= */
+.tabs-wrap{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 3px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.tab-btn{
+  height: 42px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition: all .2s ease;
+
+  /* ✅ 기본 글자색: 다크/라이트 테마 대응 */
+  color: rgba(229,231,235,0.86);
+  background: transparent;
+}
+
+html[data-theme="light"] .tab-btn{
+  color: rgba(15,23,42,0.86);
+}
+
+/* 활성 탭 */
+.tab-btn[data-active="true"]{
+  color:#fff;
+}
+
+/* 탭별 활성 그라데이션 */
+.tab-btn[data-tab="energy"][data-active="true"]{
+  background: linear-gradient(to right, #3b82f6, #7c3aed);
+}
+.tab-btn[data-tab="process"][data-active="true"]{
+  background: linear-gradient(to right, #22c55e, #10b981);
+}
+.tab-btn[data-tab="co2"][data-active="true"]{
+  background: linear-gradient(to right, #06b6d4, #3b82f6);
+}
+
+/* 섹션 show/hide */
+[data-view]{ display:none; }
+[data-view].active{ display:block; }
+
+/* =========================================
+   공정흐름(디지털트윈) 레이아웃: 페이지 내 전환
+========================================= */
+.twin-stage{
+  position: relative;
+  height: min(70vh, 680px);
+  border-radius: 22px;
+  overflow:hidden;
+  border:1px solid var(--stroke);
+  background:
+    radial-gradient(1200px 600px at 30% 20%, rgba(0,229,255,0.10), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+}
+
+.twin-main{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  transition: transform .75s ease, filter .75s ease;
+}
+
+.twin-stage.panel-open .twin-main{
+  transform: translateX(-8%) scale(0.97);
+  filter: blur(2.5px) brightness(0.75);
+}
+
+.factory-wrapper{
+  position:relative;
+  width:min(1100px, 92vw);
+  height:min(580px, 62vh);
+}
+
+.factory-bg{ width:100%; height:100%; object-fit:contain; }
+.svg-overlay{ position:absolute; inset:0; z-index:10; }
+
+.clickable-area{
+  fill: transparent;
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  cursor:pointer;
+  transition: .25s;
+}
+
+.clickable-area:hover{
+  fill: rgba(0,229,255,0.10);
+  stroke-width: 3;
+}
+
+.twin-sidebar{
+  position:absolute;
+  top:16px; right:16px; bottom:16px;
+  width: 320px;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: -20px 20px 60px rgba(0,0,0,0.75);
+  transform: translateX(130%);
+  transition: transform .65s ease, width .65s ease;
+  z-index: 20;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+.twin-sidebar.active{ transform: translateX(0); }
+.twin-sidebar.expanded{ width: 520px; }
+
+.twin-close{
+  position:absolute; top:14px; right:14px;
+  background:none; border:none;
+  color:#9ca3af;
+  font-size:18px;
+  cursor:pointer;
+}
+.twin-close:hover{ color:#fff; }
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,229,255,0.20);
+  background: rgba(0,229,255,0.06);
+  font-size: 13px;
+}
+
+.dot{
+  width:8px; height:8px; border-radius:999px;
+  background: var(--accent);
+  box-shadow: 0 0 14px rgba(0,229,255,0.65);
+}
+
+.twin-input{
+  width:100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.10);
+  color:#fff;
+  outline:none;
+  margin-top: 12px;
+}
+
+.twin-input:focus{
+  border-color: var(--accent);
+  background: rgba(0,229,255,0.06);
+}
+
+.twin-run{
+  margin-top: 10px;
+  width:100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: var(--accent);
+  color:#000;
+  font-weight: 900;
+  border:none;
+  cursor:pointer;
+}
+
+.twin-run:hover{
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.chart-wrap{
+  margin-top: 14px;
+  flex:1;
+  border-radius: 16px;
+  border:1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.22);
+  padding: 12px;
+  min-height: 240px;
+}
+
+/* =========================================
+   PSI (공정 스트레스 지표)
+========================================= */
+.psi-stack{
+  display: grid;
+  gap: 14px;
+}
+
+.psi-card{
+  overflow: visible; /* 툴팁 잘림 방지 */
+}
+
+.psi-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom: 10px;
+  overflow: visible;
+}
+
+.psi-head-left{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.psi-title{
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.psi-sub{
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(156,163,175,0.9);
+  font-weight: 700;
+}
+
+.psi-badge{
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  color: rgba(229,231,235,0.95);
+}
+
+/* 게이지 래퍼 */
+.psi-gauge-wrap{
+  height: 140px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-top: 4px;
+}
+
+.psi-gauge{
+  width: 100%;
+  height: 100%;
+  max-width: 360px;
+  display:block;
+}
+
+/* [PSI 게이지 동적 제어 핵심 설정] */
+/* SVG transform attribute 사용: rotate(angle cx cy) 형식으로 중심 지정 */
+.psi-progress {
+  /* 프로그레스 호 애니메이션: stroke-dashoffset 변경 */
+  transition: stroke-dashoffset 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: stroke-dashoffset;
+  pointer-events: none;
+}
+
+/* ? 아이콘 + 말풍선 */
+.psi-help{
+  position: relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top: 2px;
+  outline: none;
+}
+
+.psi-help-icon{
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 900;
+  font-size: 12px;
+
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.06);
+  color: rgba(229,231,235,0.92);
+  cursor: help;
+  user-select: none;
+  transition: transform .14s ease, background .14s ease, border-color .14s ease;
+}
+
+.psi-help:hover .psi-help-icon,
+.psi-help:focus .psi-help-icon{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(0,229,255,0.40);
+}
+
+.psi-tooltip{
+  position:absolute;
+  top: 30px;
+  left: -6px;
+  z-index: 9999;
+
+  width: 280px;
+  padding: 12px 12px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(8,10,14,0.96);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.55);
+
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+.psi-help:hover .psi-tooltip,
+.psi-help:focus .psi-tooltip{
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.psi-tooltip::before{
+  content:"";
+  position:absolute;
+  top:-7px;
+  left: 14px;
+  width: 12px;
+  height: 12px;
+  transform: rotate(45deg);
+  background: rgba(8,10,14,0.96);
+  border-left: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+.psi-tooltip-title{
+  font-weight: 900;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: rgba(0,229,255,0.95);
+}
+
+.psi-tooltip-body{
+  color: rgba(229,231,235,0.92);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.psi-tooltip-sub{
+  margin-top: 6px;
+  color: rgba(156,163,175,0.9);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.psi-head-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.psi-topval{
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* [PSI 게이지 동적 제어 핵심 설정] */
+
+/* 1. 바늘의 회전 중심축을 SVG 내부 좌표 (110, 120)로 고정 */
+.psi-needle {
+  transform-origin: 110px 120px;
+  /* 중심축 기준을 SVG 뷰박스 내부로 강제 고정 */
+  transform-box: fill-box;
+  /* 데이터 전송 주기(0.3초)에 맞춰 부드럽게 따라오도록 설정 */
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  pointer-events: none; /* 바늘 위에 마우스가 올라가도 툴팁 등을 방해하지 않게 함 */
+  filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.4)); /* 바늘 자체에 미세한 광원 효과 */
+}
+
+/* 2. 바늘 아래 그림자(Filter)가 끊기지 않게 최적화 */
+#psiNeedleGlow, #psiNeedleGlow2 {
+  color-interpolation-filters: sRGB;
+}
+
+/* 3. 텍스트 수치가 바뀔 때 눈이 편안하도록 부드러운 전환 효과 */
+.psi-text, .psi-topval {
+  transition: all 0.3s ease;
+}
+
+
+/* =========================================
+   PSI Group Layout (new)
+========================================= */
+.psi-group{ display: grid; gap: 14px; }
+
+.psi-group-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom: 6px;
+}
+
+.psi-group-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.psi-block{
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.03);
+  padding: 14px 14px 6px;
+}
+
+html[data-theme="light"] .psi-block{
+  background: rgba(15,23,42,0.03);
+}
+
+.psi-block-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 8px;
+}
+
+.psi-block-label{
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.psi-block-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.psi-topval{
+  font-weight: 900;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ✅ SVG readability via CSS tokens */
+.psi-gauge .psi-track{ stroke: var(--psi-track) !important; }
+.psi-gauge .psi-center{ fill: var(--psi-center-fill) !important; }
+.psi-gauge .psi-center-cap{ fill: rgba(0,0,0,0.0) !important; } /* 캡 내부 채움은 투명 */
+.psi-gauge .psi-text{ fill: var(--psi-text) !important; }
+.psi-gauge .psi-subtext{ fill: var(--psi-subtext) !important; }
+
+/* (선택) 중앙 숫자는 우측 상단만 쓰고 싶으면 숨김 */
+/* .psi-gauge .psi-text{ display:none; } */
+
+/* =========================================
+   Light mode fixes for PSI badge / help / tooltip
+========================================= */
+html[data-theme="light"] .psi-help-icon{
+  border-color: rgba(15,23,42,0.16);
+  background: rgba(15,23,42,0.06);
+  color: rgba(15,23,42,0.82);
+}
+
+html[data-theme="light"] .psi-tooltip{
+  border-color: rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.98);
+  box-shadow: 0 18px 55px rgba(15,23,42,0.18);
+}
+html[data-theme="light"] .psi-tooltip::before{
+  background: rgba(255,255,255,0.98);
+  border-left: 1px solid rgba(15,23,42,0.12);
+  border-top: 1px solid rgba(15,23,42,0.12);
+}
+html[data-theme="light"] .psi-tooltip-title{ color: rgba(2,132,199,0.95); }
+html[data-theme="light"] .psi-tooltip-body{ color: rgba(15,23,42,0.86); }
+html[data-theme="light"] .psi-tooltip-sub{ color: rgba(15,23,42,0.55); }
+
+/* =========================================
+   PSI Light mode readability fixes
+========================================= */
+html[data-theme="light"] .psi-sub{
+  color: rgba(15,23,42,0.55);
+}
+
+html[data-theme="light"] .psi-badge{
+  border-color: rgba(15,23,42,0.14);
+  background: rgba(15,23,42,0.06);
+  color: rgba(15,23,42,0.82);
+}
+
+html[data-theme="light"] .psi-help-icon{
+  border-color: rgba(15,23,42,0.16);
+  background: rgba(15,23,42,0.06);
+  color: rgba(15,23,42,0.82);
+}
+
+html[data-theme="light"] .psi-help:hover .psi-help-icon,
+html[data-theme="light"] .psi-help:focus .psi-help-icon{
+  background: rgba(0,229,255,0.10);
+  border-color: rgba(0,229,255,0.40);
+}
+/* SVG 텍스트/트랙/센터 색을 CSS 변수로 강제 */
+.psi-gauge [data-psi-text] { fill: var(--psi-text) !important; }
+.psi-gauge .psi-subtext { fill: var(--psi-subtext) !important; }
+.psi-gauge .psi-track { stroke: var(--psi-track) !important; }
+.psi-gauge .psi-center { fill: var(--psi-center-fill) !important; }
+
+/* 툴팁은 라이트에서 흰 배경 + 진한 글씨로 반전 */
+html[data-theme="light"] .psi-tooltip{
+  border-color: rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.98);
+  box-shadow: 0 18px 55px rgba(15,23,42,0.18);
+}
+
+html[data-theme="light"] .psi-tooltip::before{
+  background: rgba(255,255,255,0.98);
+  border-left: 1px solid rgba(15,23,42,0.12);
+  border-top: 1px solid rgba(15,23,42,0.12);
+}
+
+html[data-theme="light"] .psi-tooltip-title{
+  color: rgba(2,132,199,0.95); /* cyan 계열 */
+}
+
+html[data-theme="light"] .psi-tooltip-body{
+  color: rgba(15,23,42,0.86);
+}
+
+html[data-theme="light"] .psi-tooltip-sub{
+  color: rgba(15,23,42,0.55);
+}
+
+/* toggleProjection 버튼 상태 */
+#toggleProjection{
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+#toggleProjection.is-on{
+  background: rgba(167,139,250,0.18);
+  box-shadow: 0 0 0 1px rgba(167,139,250,0.35) inset, 0 10px 25px rgba(167,139,250,0.10);
+}
+#toggleProjection:active{
+  transform: translateY(1px);
+}
+
+/* 이전 legend는 미사용 */
+.psi-legend{ display:none !important; }
+
+/* =========================================
+   Row2 Theme (이전 테마로 원복)
+   - 레이아웃/데이터는 그대로
+   - 좌측 KPI: 청록 카드
+   - 우측/하단: 다크 소프트 카드
+========================================= */
+
+/* Row2 영역: MAD 글로우 배경 제거 (혹시 남아있을 때 대비) */
+.energy-glow-area { position: relative; }
+.energy-glow-area::before{
+  content: none !important;
+  display: none !important;
+}
+
+/* Row2 공통 카드(우측 큰 카드/컨테이너): 다크 소프트 */
+.glow-card{
+  background: rgba(17, 24, 39, 0.72) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.35) !important;
+  backdrop-filter: blur(10px) !important;
+  transform: none !important;
+}
+
+.glow-card:hover{
+  border-color: rgba(255,255,255,0.14) !important;
+  box-shadow: 0 18px 52px rgba(0,0,0,0.40) !important;
+  transform: none !important;
+}
+
+/* =========================================
+   KPI Cyan 카드: 텍스트/구분선/차트 대비 강제 (가독성 fix)
+   - Tailwind text-white/* 를 전부 "검정톤"으로 override
+   - 차트는 cyan 배경 위에서 안 죽도록 얇은 다크 플레이트 제공
+========================================= */
+.kpi-cyan,
+.energy-kpi-card{
+  background: rgba(34, 211, 238, 0.92) !important;
+  border: 0 !important;
+  box-shadow: 0 18px 50px rgba(34, 211, 238, 0.18) !important;
+
+  /* ✅ 기본 글자색을 확실히 다크로 */
+  color: rgba(0,0,0,0.88) !important;
+}
+
+/* ✅ Tailwind text-white / text-white/xx 전부 강제 오버라이드 */
+.glow-card.kpi-cyan .text-white,
+.glow-card.kpi-cyan [class*="text-white"]{
+  color: rgba(0,0,0,0.82) !important;
+}
+
+/* KPI 카드 내부 muted 톤 */
+.glow-card.kpi-cyan .muted,
+.energy-kpi-card .muted{
+  color: rgba(0,0,0,0.62) !important;
+}
+
+/* KPI 숫자(큰 값) */
+.glow-card.kpi-cyan .neon-value,
+.energy-kpi-card .neon-value{
+  color: rgba(0,0,0,0.92) !important;
+  text-shadow: none !important;
+}
+
+/* ✅ KPI 카드 구분선(원래는 흰색 10%) → 검정 10%로 */
+.glow-card.kpi-cyan .border-white\/10{
+  border-color: rgba(0,0,0,0.10) !important;
+}
+
+/* ✅ KPI 카드 안의 차트가 너무 희미해지는 문제 해결:
+   차트 영역에 얇은 다크 플레이트를 깔아 대비 확보 */
+.glow-card.kpi-cyan .chart-glow{
+  background: rgba(0,0,0,0.08) !important;
+  border: 1px solid rgba(0,0,0,0.10) !important;
+  border-radius: 16px;
+  padding: 16px !important;
+
+  /* ✅ 차트 높이 키움 */
+  min-height: 180px;
+}
+
+/* ✅ 캔버스 자체 대비 조금 올림 (차트 색 안 건드리고 "보이게"만) */
+.glow-card.kpi-cyan canvas{
+  height: 160px !important;   /* 기존보다 증가 */
+}
+
+/* Row2 차트 래퍼: 유리감 제거 */
+.chart-glow{
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Row2 카드 내부 구분선 톤 */
+.glow-card .border-white\/10{
+  border-color: rgba(255,255,255,0.10) !important;
+}
+
+/* Row2 내부 공정 카드(proc-item)도 이전 테마 느낌으로 정리 */
+.glow-card .proc-item{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  box-shadow: none;
+  transition: background .2s ease, border-color .2s ease;
+}
+
+.glow-card .proc-item:hover{
+  background: rgba(255,255,255,0.055);
+  border-color: rgba(255,255,255,0.12);
+}
+
+
+/* =========================================
+   Theme Toggle (Dark <-> Light)
+   - 기본은 :root(dark)
+   - html[data-theme="light"] 일 때만 변수 교체
+========================================= */
+html[data-theme="light"]{
+  /* ✅ 배경: 너무 파랗지 않은 따뜻한 회백 */
+  --bg:#f6f7fb;
+
+  /* ✅ panel: 살짝 유리감 */
+  --panel:rgba(255,255,255,0.80);
+
+  /* ✅ card: 완전 흰색 대신 아주 약간 톤 */
+  --card:rgba(255,255,255,0.92);
+
+  /* ✅ stroke: 과하지 않게 */
+  --stroke:rgba(15,23,42,0.10);
+
+  /* ✅ muted: 더 고급 톤 */
+  --muted:#475569;
+}
+
+html[data-theme="light"] body{
+  color:#0f172a;
+}
+
+/* 라이트 모드 카드 그림자도 “회색 빛”으로 */
+html[data-theme="light"] .soft-card{
+  box-shadow: 0 18px 55px rgba(15,23,42,0.08);
+}
+
+/* 라이트 모드에서 탭 배경이 너무 하얗게 뜨면 살짝만 정리 */
+html[data-theme="light"] .tabs-wrap{
+  box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+}
+
+#themeToggle {
+  backdrop-filter: blur(6px);
+}
+
+#themeToggle:hover {
+  transform: translateY(-1px);
+}
+
+/* ==============================
+   Smooth theme transition
+============================== */
+html, body,
+.soft-card, .glow-card, .tabs-wrap,
+.twin-stage, .twin-sidebar,
+.proc-item, .chart-wrap {
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+/* ==============================
+   월별 전기료 추이: 카드 높이 꽉 채우기
+   - #monthlyCostTrend 캔버스가 부모 높이를 100% 사용하도록 고정
+============================== */
+#monthlyCostTrend{
+  width: 100% !important;
+  height: 100% !important;     /* ✅ 핵심 */
+  display: block;
+}
+
+/* JS가 unit-caption 붙이면서 부모를 flex로 바꾸니까,
+   그 부모(=canvas의 parentElement)가 "늘어날 수" 있게 */
+#monthlyCostTrend.parent-flex-fix{
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+/* 캔버스는 위 영역을 전부 먹고 */
+#monthlyCostTrend.parent-flex-fix canvas{
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* 단위 캡션은 아래로 고정 */
+#monthlyCostTrend.parent-flex-fix .unit-caption{
+  margin-top: 16px;
+}
+/* ==============================
+   월별 전기료 카드: 라이트 모드에서만 밝게
+   (glow-card가 !important로 어두운 배경 박는 문제 해결)
+============================== */
+html[data-theme="light"] .glow-card{
+  background: rgba(255,255,255,0.92) !important;
+  border-color: rgba(15,23,42,0.10) !important;
+  box-shadow: 0 18px 55px rgba(15,23,42,0.08) !important;
+}
+
+/* 월별 카드 타이틀/서브텍스트 색상 (테마 대응) */
+.monthly-title{ color: rgba(235,245,255,0.92); }
+.monthly-sub{ color: rgba(235,245,255,0.60); }
+
+html[data-theme="light"] .monthly-title{ color: rgba(15,23,42,0.92); }
+html[data-theme="light"] .monthly-sub{ color: rgba(15,23,42,0.55); }
+
+/* ============================================
+   [SECTION: ETS 배출권 패널 스타일]
+   ============================================ */
+
+.krx-ticker{
+  position: relative;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.35);
+  border-radius: 14px;
+  padding: 10px 0;
+  overflow: hidden;
+}
+
+.krx-ticker__track{
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+  padding: 0 14px;
+  will-change: transform;
+  animation: krxMarquee 26s linear infinite;
+}
+
+.krx-ticker:hover .krx-ticker__track{
+  animation-play-state: paused; /* 마우스 올리면 멈춤 */
+}
+
+@keyframes krxMarquee{
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* JS에서 내용을 2번 복제해서 -50%로 정확히 루프 */
+}
+
+.krx-pill{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  font-size: 12px;
+  color: rgba(255,255,255,.78);
+}
+
+.krx-sym{ font-weight: 800; letter-spacing: .06em; color: rgba(255,255,255,.85); }
+.krx-px{ font-weight: 900; font-variant-numeric: tabular-nums; color: rgba(255,255,255,.92); }
+.krx-chg{ font-weight: 900; font-variant-numeric: tabular-nums; }
+.krx-up{ color: rgba(248,113,113,.95); }    /* 빨강 (상승) */
+.krx-dn{ color: rgba(96,165,250,.95); }     /* 파랑 (하락) */
+.krx-flat{ color: rgba(148,163,184,.95); }  /* 중립 */
+
+.krx-dot{
+  width: 4px; height: 4px; border-radius: 999px;
+  background: rgba(255,255,255,.25);
+}
+
+.krx-ticker__fade{
+  position: absolute; top: 0; bottom: 0;
+  width: 38px;
+  pointer-events: none;
+  z-index: 2;
+}
+.krx-ticker__fade--l{
+  left: 0;
+  background: linear-gradient(to right, rgba(0,0,0,.65), rgba(0,0,0,0));
+}
+.krx-ticker__fade--r{
+  right: 0;
+  background: linear-gradient(to left, rgba(0,0,0,.65), rgba(0,0,0,0));
+}
+
+.krx-glow { text-shadow: 0 0 18px rgba(34,211,238,.18); }
+
+/* ETS Board background: 화려한 배경 */
+.ets-board{
+  position: relative;
+  background: #070a12;
+  overflow: hidden;
+}
+
+/* ✅ 배경 이미지 (존재하면 적용, 없으면 깔끔한 그라데이션) */
+.ets-board::before{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, 
+    rgba(10, 20, 50, 0.95) 0%,
+    rgba(15, 35, 70, 0.92) 50%,
+    rgba(8, 18, 40, 0.95) 100%);
+  opacity: .95;
+  filter: saturate(1.05) contrast(1.05);
+  pointer-events:none;
+}
+
+/* ✅ 전광판 느낌: 살짝 어두운 비네팅 + 글자 가독성 */
+.ets-board::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(900px 480px at 20% 10%, rgba(0,0,0,0.10), transparent 55%),
+    radial-gradient(900px 520px at 80% 10%, rgba(0,0,0,0.18), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.35));
+  pointer-events:none;
+}
+
+.ets-board > *{ position: relative; z-index: 1; }
+
+/* ETS Ticker 스타일 */
+.ets-ticker{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+html[data-theme="light"] .ets-ticker{
+  border-color: rgba(15,23,42,0.12);
+  background: rgba(15,23,42,0.03);
+}
+
+.ets-ticker-mask{
+  position: relative;
+  overflow: hidden;
+  padding: 10px 12px;
+}
+
+/* 좌우 페이드(거래소 감성) */
+.ets-ticker-mask::before,
+.ets-ticker-mask::after{
+  content:"";
+  position:absolute; top:0; bottom:0;
+  width: 42px;
+  pointer-events:none;
+  z-index: 2;
+}
+.ets-ticker-mask::before{ left:0; background: linear-gradient(to right, rgba(5,6,11,1), rgba(5,6,11,0)); }
+.ets-ticker-mask::after { right:0; background: linear-gradient(to left, rgba(5,6,11,1), rgba(5,6,11,0)); }
+
+html[data-theme="light"] .ets-ticker-mask::before{ background: linear-gradient(to right, rgba(246,247,251,1), rgba(246,247,251,0)); }
+html[data-theme="light"] .ets-ticker-mask::after { background: linear-gradient(to left, rgba(246,247,251,1), rgba(246,247,251,0)); }
+
+.ets-ticker-track{
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+  animation: etsMarquee 26s linear infinite;
+}
+
+.ets-pill{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.20);
+}
+
+html[data-theme="light"] .ets-pill{
+  border-color: rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.75);
+}
+
+.ets-sym{ font-weight: 900; letter-spacing: -0.02em; }
+.ets-price{ font-weight: 900; font-variant-numeric: tabular-nums; }
+.ets-chg{ font-weight: 900; font-variant-numeric: tabular-nums; opacity: .95; }
+
+.ets-up{ color: rgba(248,113,113,0.95); }   /* red */
+.ets-dn{ color: rgba(96,165,250,0.95); }    /* blue */
+
+@keyframes etsMarquee{
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+
+

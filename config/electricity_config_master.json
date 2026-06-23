@@ -1,0 +1,305 @@
+{
+  "description": "전기요금 시뮬레이션 마스터 설정 파일",
+  "scenarios": {
+    "2018_industrial_HV_A_opt1": {
+      "desc": "2018년 기준: 산업용(을) 고압A 선택Ⅰ (계약 660kW)",
+      "contract_kw": 660.0,
+      "base_rate": 7220.0,
+      "additional_fees": {
+        "climate": 0.0,
+        "fuel": 0.0,
+        "fund_rate": 0.037,
+        "vat_rate": 0.1
+      },
+      "tou_schedule": {
+        "note": "2018년 이전 구 시간대 (경부하 23시 시작)",
+        "summer": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 13], [17, 23]],
+          "peak": [[10, 12], [13, 17]]
+        },
+        "spring_fall": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 13], [17, 23]],
+          "peak": [[10, 12], [13, 17]]
+        },
+        "winter": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 17], [20, 22]],
+          "peak": [[10, 12], [17, 20], [22, 23]]
+        }
+      },
+      "unit_prices": {
+        "note": "산업용(을) 고압A 선택Ⅰ 단가표 (기본료 저렴, 단가 비쌈)",
+        "summer": { "off": 61.6, "mid": 114.5, "peak": 196.6 },
+        "spring_fall": { "off": 61.6, "mid": 84.1, "peak": 114.8 },
+        "winter": { "off": 68.8, "mid": 114.7, "peak": 172.2 }
+      },
+      "pf_logic": {
+        "lag_target": 90,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.01,
+        "lag_start": 9, 
+        "lag_end": 23
+      }
+    },
+    "2018_industrial_HV_A_opt2": {
+      "desc": "2018년 기준: 산업용(을) 고압A 선택Ⅱ (계약 660kW)",
+      "contract_kw": 660.0,
+      "base_rate": 8320.0,
+      "additional_fees": {
+        "climate": 0.0,
+        "fuel": 0.0,
+        "fund_rate": 0.037,
+        "vat_rate": 0.1
+      },
+      "tou_schedule": {
+        "note": "2018년 이전 구 시간대 (경부하 23시 시작)",
+        "summer": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 13], [17, 23]],
+          "peak": [[10, 12], [13, 17]]
+        },
+        "spring_fall": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 13], [17, 23]],
+          "peak": [[10, 12], [13, 17]]
+        },
+        "winter": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 17], [20, 22]],
+          "peak": [[10, 12], [17, 20], [22, 23]]
+        }
+      },
+      "unit_prices": {
+        "note": "산업용(을) 고압A 선택Ⅱ 단가표 (기본료 보통, 단가 보통)",
+        "summer": { "off": 56.1, "mid": 109.0, "peak": 191.1 },
+        "spring_fall": { "off": 56.1, "mid": 78.6, "peak": 109.3 },
+        "winter": { "off": 63.1, "mid": 109.2, "peak": 166.7 }
+      },
+      "pf_logic": {
+        "lag_target": 90,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.01,
+        "lag_start": 9, 
+        "lag_end": 23
+      }
+    },
+    "2018_industrial_HV_A_opt3": {
+      "desc": "2018년 기준: 산업용(을) 고압A 선택Ⅲ (계약 660kW)",
+      "contract_kw": 660.0,
+      "base_rate": 9810.0,
+      "additional_fees": {
+        "climate": 0.0,
+        "fuel": 0.0,
+        "fund_rate": 0.037,
+		"vat_rate":0.1
+      },
+      "tou_schedule": {
+        "note": "2018년 이전 구 시간대 (경부하 23시 시작)",
+        "summer": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 13], [17, 23]],
+          "peak": [[10, 12], [13, 17]]
+        },
+        "spring_fall": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 13], [17, 23]],
+          "peak": [[10, 12], [13, 17]]
+        },
+        "winter": {
+          "off": [[23, 9]],
+          "mid": [[9, 10], [12, 17], [20, 22]],
+          "peak": [[10, 12], [17, 20], [22, 23]]
+        }
+      },
+      "unit_prices": {
+        "note": "산업용(을) 고압A 선택Ⅲ 단가표 ",
+        "summer": { "off": 55.2, "mid": 108.4, "peak": 178.7 },
+        "spring_fall": { "off": 55.2, "mid": 77.3, "peak": 101.0 },
+        "winter": { "off": 62.5, "mid": 108.6, "peak": 155.5 }
+      },
+	  "pf_logic": {
+        "lag_target": 90,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.01,
+        "lag_start": 9, 
+        "lag_end": 23
+      }
+    },
+	"2026_standard": {
+      "desc": "2025.04.01 시행 규정 (고압A 선택II)",
+      "base_rate": 8320.0,
+      "additional_fees": { "climate": 9.0, "fuel": 5.0 },
+      "tou_schedule": {
+        "summer": { "off": [[22, 8]], "mid": [[8, 11], [12, 13], [18, 22]], "peak": [[11, 12], [13, 18]] },
+        "spring_fall": { "off": [[22, 8]], "mid": [[8, 11], [12, 13], [18, 22]], "peak": [[11, 12], [13, 18]] },
+        "winter": { "off": [[22, 8]], "mid": [[8, 9], [12, 16], [19, 22]], "peak": [[9, 12], [16, 19]] }
+      },
+      "unit_prices": {
+        "summer": { "off": 110.9, "mid": 163.8, "peak": 245.9 },
+        "spring_fall": { "off": 110.9, "mid": 133.4, "peak": 164.1 },
+        "winter": { "off": 117.9, "mid": 164.0, "peak": 221.5 }
+      }, 
+	  "pf_logic":{
+		  "lag_target": 92,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.1,
+        "lag_start": 8,
+        "lag_end": 22
+		},
+	  "additional_fees":{"fund_rate": 0.032, "vat_rate":0.1}
+    },
+    "2026_jeju": {
+      "desc": "2025.04.01 제주 지역 전용 시간대 적용",
+      "base_rate": 8320.0,
+      "additional_fees": { "climate": 9.0, "fuel": 5.0 },
+      "tou_schedule": {
+        "note": "제주는 계절 무관 동일 시간대",
+        "summer": { "off": [[22, 8]], "mid": [[8, 16]], "peak": [[16, 22]] },
+        "spring_fall": { "off": [[22, 8]], "mid": [[8, 16]], "peak": [[16, 22]] },
+        "winter": { "off": [[22, 8]], "mid": [[8, 16]], "peak": [[16, 22]] }
+      },
+      "unit_prices": {
+        "summer": { "off": 110.9, "mid": 163.8, "peak": 245.9 },
+        "spring_fall": { "off": 110.9, "mid": 133.4, "peak": 164.1 },
+        "winter": { "off": 117.9, "mid": 164.0, "peak": 221.5 }
+      },
+	  "pf_logic":{"lag_target": 90, "lead_target":95, "rate_per_1_pct": 0.002, "max_adjustment":0.01},
+	  "additional_fees":{"fund_rate": 0.032, "vat_rate":0.1}
+    },
+    "2026_industrial_HV_A_opt1": {
+      "desc": "2026년 기준(25.4.1 시행): 산업용(을) 고압A 선택Ⅰ (계약 660kW)",
+      "contract_kw": 660.0,
+      "base_rate": 7220.0,
+      "additional_fees": {
+        "climate": 9.0,
+        "fuel": 5.0,
+        "fund_rate": 0.027,
+        "vat_rate": 0.1
+      },
+      "tou_schedule": {
+        "note": "2025.4.1 개편 시간대 (경부하 22시 시작)",
+        "summer": {
+          "off": [[22, 8]],
+          "mid": [[8, 11], [12, 13], [18, 22]],
+          "peak": [[11, 12], [13, 18]]
+        },
+        "spring_fall": {
+          "off": [[22, 8]],
+          "mid": [[8, 11], [12, 13], [18, 22]],
+          "peak": [[11, 12], [13, 18]]
+        },
+        "winter": {
+          "off": [[22, 8]],
+          "mid": [[8, 9], [12, 16], [19, 22]],
+          "peak": [[9, 12], [16, 19]]
+        }
+      },
+      "unit_prices": {
+        "note": "산업용(을) 고압A 선택Ⅰ (기본료 최저, 단가 최고)",
+        "summer": { "off": 116.4, "mid": 169.3, "peak": 251.4 },
+        "spring_fall": { "off": 116.4, "mid": 138.9, "peak": 169.6 },
+        "winter": { "off": 123.4, "mid": 169.5, "peak": 227.0 }
+      },
+      "pf_logic": {
+        "lag_target": 92,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.1,
+        "lag_start": 8,
+        "lag_end": 22
+      }
+    },
+    "2026_industrial_HV_A_opt2": {
+      "desc": "2026년 기준(25.4.1 시행): 산업용(을) 고압A 선택Ⅱ (계약 660kW)",
+      "contract_kw": 660.0,
+      "base_rate": 8320.0,
+      "additional_fees": {
+        "climate": 9.0,
+        "fuel": 5.0,
+        "fund_rate": 0.027,
+        "vat_rate": 0.1
+      },
+      "tou_schedule": {
+        "note": "2025.4.1 개편 시간대 (경부하 22시 시작)",
+        "summer": {
+          "off": [[22, 8]],
+          "mid": [[8, 11], [12, 13], [18, 22]],
+          "peak": [[11, 12], [13, 18]]
+        },
+        "spring_fall": {
+          "off": [[22, 8]],
+          "mid": [[8, 11], [12, 13], [18, 22]],
+          "peak": [[11, 12], [13, 18]]
+        },
+        "winter": {
+          "off": [[22, 8]],
+          "mid": [[8, 9], [12, 16], [19, 22]],
+          "peak": [[9, 12], [16, 19]]
+        }
+      },
+      "unit_prices": {
+        "note": "산업용(을) 고압A 선택Ⅱ (기본료 보통, 단가 보통)",
+        "summer": { "off": 110.9, "mid": 163.8, "peak": 245.9 },
+        "spring_fall": { "off": 110.9, "mid": 133.4, "peak": 164.1 },
+        "winter": { "off": 117.9, "mid": 164.0, "peak": 221.5 }
+      },
+      "pf_logic": {
+        "lag_target": 92,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.1,
+        "lag_start": 8,
+        "lag_end": 22
+      }
+    },
+    "2026_industrial_HV_A_opt3": {
+      "desc": "2026년 기준(25.4.1 시행): 산업용(을) 고압A 선택Ⅲ (계약 660kW)",
+      "contract_kw": 660.0,
+      "base_rate": 9810.0,
+      "additional_fees": {
+        "climate": 9.0,
+        "fuel": 5.0,
+        "fund_rate": 0.027,
+        "vat_rate": 0.1
+      },
+      "tou_schedule": {
+        "note": "2025.4.1 개편 시간대 (경부하 22시 시작)",
+        "summer": {
+          "off": [[22, 8]],
+          "mid": [[8, 11], [12, 13], [18, 22]],
+          "peak": [[11, 12], [13, 18]]
+        },
+        "spring_fall": {
+          "off": [[22, 8]],
+          "mid": [[8, 11], [12, 13], [18, 22]],
+          "peak": [[11, 12], [13, 18]]
+        },
+        "winter": {
+          "off": [[22, 8]],
+          "mid": [[8, 9], [12, 16], [19, 22]],
+          "peak": [[9, 12], [16, 19]]
+        }
+      },
+      "unit_prices": {
+        "note": "산업용(을) 고압A 선택Ⅲ (기본료 최고, 단가 최저)",
+        "summer": { "off": 110.0, "mid": 163.2, "peak": 233.5 },
+        "spring_fall": { "off": 110.0, "mid": 132.1, "peak": 155.8 },
+        "winter": { "off": 117.3, "mid": 163.4, "peak": 210.3 }
+      },
+      "pf_logic": {
+        "lag_target": 92,
+        "lead_target": 95,
+        "rate_per_1_pct": 0.002,
+        "max_adjustment": 0.1,
+        "lag_start": 8,
+        "lag_end": 22
+      }
+    }
+  }
+}
