@@ -2,7 +2,7 @@
 
 raw CSV  ->  features.parquet  (+ reactive_maxima.json)
 
-Pipeline order (matches notebook):
+Pipeline order:
     load -> time -> cyclic -> power -> CO2 restore -> operating flag -> PSI
 """
 import json

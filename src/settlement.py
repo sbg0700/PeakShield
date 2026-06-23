@@ -1,16 +1,16 @@
 """KEPCO bill settlement: voltage/plan combination search (As-Is vs To-Be).
 
-Ported from the price notebook (`최종가격산출함수.ipynb`).
+Finds the cheapest voltage (A/B/C) x plan (I/II/III) combination per month and
+compares the pre- vs post-optimization bill.
 
-⚠️ KNOWN GAP: the inner tariff calculator ``kepco_bill_300kw_plus()`` and its
-``BillInputs`` payload were *called but never defined* in the original notebook
-(the definition was lost). Everything around it — season/TOU assignment, monthly
-bill-input aggregation, contract recommendation, and the combination-search
-settlement — is ported faithfully. Drop the real implementation into
+⚠️ The inner tariff calculator ``kepco_bill_300kw_plus()`` and its ``BillInputs``
+payload are a placeholder (not yet implemented). Everything around it —
+season/TOU assignment, monthly bill-input aggregation, contract recommendation,
+and the combination-search settlement — is complete. Provide a real
 ``kepco_bill_300kw_plus`` (and extend ``BillInputs`` if needed) to enable
 ``settlement_kepco_after_optimization``.
 
-The MAIN ROI path does NOT use this module — see
+The main ROI path does NOT use this module — see
 ``economics.calculate_advanced_financial_roi``, which is self-contained.
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ import pandas as pd
 
 
 # ---------------------------------------------------------------------------
-# Tariff calculator payload + placeholder (lost from the original notebook)
+# Tariff calculator payload + placeholder (not yet implemented)
 # ---------------------------------------------------------------------------
 @dataclass
 class BillInputs:
@@ -42,14 +42,12 @@ class BillInputs:
 def kepco_bill_300kw_plus(x: "BillInputs") -> Dict[str, float]:
     """Compute a KEPCO industrial (>=300kW) monthly bill from :class:`BillInputs`.
 
-    PLACEHOLDER — definition was lost from the original notebook. When restored,
-    it must return at least:
+    PLACEHOLDER (not yet implemented). It must return at least:
         {"total_bill_won": ..., "base_charge_won": ..., "energy_charge_won": ...}
     """
     raise NotImplementedError(
-        "kepco_bill_300kw_plus() is a placeholder. The original definition was "
-        "lost from the price notebook. Provide the tariff table lookup "
-        "(voltage A/B/C x plan I/II/III base+energy charges) to enable "
+        "kepco_bill_300kw_plus() is not yet implemented. Provide the tariff table "
+        "lookup (voltage A/B/C x plan I/II/III base+energy charges) to enable "
         "settlement_kepco_after_optimization(). The main ROI path "
         "(economics.calculate_advanced_financial_roi) does not need this."
     )

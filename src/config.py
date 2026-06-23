@@ -1,7 +1,6 @@
 """Central configuration: paths, column names, feature lists, constants.
 
 All other modules import from here so the pipeline has a single source of truth.
-Ported from the original notebook's environment/setup cells.
 """
 from __future__ import annotations
 
@@ -29,7 +28,7 @@ USAGE_MODEL_PATH = MODELS_DIR / "usage_model.json"
 PF_MODEL_PATH = MODELS_DIR / "pf_model.json"
 
 # ----------------------------------------------------------------------------
-# Raw schema — positional rename applied right after read_csv (notebook cell 5)
+# Raw schema — positional rename applied right after read_csv
 # ----------------------------------------------------------------------------
 COLUMN_NAMES = [
     "date",
@@ -48,16 +47,16 @@ COLUMN_NAMES = [
 # ----------------------------------------------------------------------------
 # Feature engineering constants
 # ----------------------------------------------------------------------------
-# Cyclic-encoded columns -> period (notebook cell 13)
+# Cyclic-encoded columns -> period
 CYCLIC_TARGETS = {"Month": 12, "DayOfWeek": 7}
 
-# KEPCO seasons (notebook cell 11)
+# KEPCO seasons
 SUMMER_MONTHS = [6, 7, 8]
 SPRING_FALL_MONTHS = [3, 4, 5, 9, 10]
 # everything else -> Winter
 
 # ----------------------------------------------------------------------------
-# Surrogate model: feature list + targets (notebook cell 39)
+# Surrogate model: feature list + targets
 # ----------------------------------------------------------------------------
 FEATURES = [
     "Hour",
@@ -74,10 +73,10 @@ FEATURES = [
 TARGET_USAGE = "Usage_kWh"
 TARGET_PF = "PF_Physical"
 
-# XGBoost categorical columns (notebook cell 59)
+# XGBoost categorical columns
 CATEGORICAL_FEATURES = ["Hour", "Is_Weekend", "Is_Operating_Flag"]
 
-# Time-ordered train/test split ratio (notebook cell 59)
+# Time-ordered train/test split ratio
 TRAIN_SPLIT = 0.8
 
 # ----------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 """Feature engineering: time, cyclic, and power-derived features.
 
-Ported from notebook cells 11 (time), 13 (cyclic sin/cos), 15 (power features).
 All functions are pure: they operate on a copy and return a new DataFrame.
 """
 from __future__ import annotations
@@ -14,7 +13,7 @@ from . import config
 
 
 def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
-    """NSM/date-derived calendar features + KEPCO season (cell 11)."""
+    """NSM/date-derived calendar features + KEPCO season."""
     df = df.copy()
     df["Hour"] = df["NSM"] // 3600
     df["DayOfWeek"] = df["date"].dt.dayofweek  # 0=Mon, 6=Sun
@@ -33,7 +32,7 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_cyclic_features(df: pd.DataFrame) -> pd.DataFrame:
-    """sin/cos encoding for cyclic columns (cell 13)."""
+    """sin/cos encoding for cyclic columns."""
     df = df.copy()
     for col, period in config.CYCLIC_TARGETS.items():
         df[f"{col}_sin"] = np.sin(2 * np.pi * df[col].astype(float) / period)
@@ -42,11 +41,11 @@ def add_cyclic_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_power_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Physical power-quality features (cell 15).
+    """Physical power-quality features.
 
     Note: ``Motor_Operating_Rate`` / ``Capacitor_Operating_Rate`` are normalized
-    against the dataset-wide max reactive power (treated as 100% utilization),
-    matching the original notebook. See :func:`get_reactive_maxima`.
+    against the dataset-wide max reactive power (treated as 100% utilization).
+    See :func:`get_reactive_maxima`.
     """
     df = df.copy()
     lag = df["Lagging_Current_Reactive_Power_kVarh"]
@@ -83,8 +82,8 @@ def add_power_features(df: pd.DataFrame) -> pd.DataFrame:
 def get_reactive_maxima(df: pd.DataFrame) -> Dict[str, float]:
     """Dataset-wide maxima needed by the simulator to reconstruct physical kVarh.
 
-    These constants (``max_lagging``/``max_leading``) are the same ones the
-    notebook captures inline in cell 15 and feeds into ``HybridFastSimulator``.
+    These constants (``max_lagging``/``max_leading``) feed into
+    ``HybridFastSimulator`` to reconstruct physical reactive power.
     """
     return {
         "max_lagging": float(df["Lagging_Current_Reactive_Power_kVarh"].max()),

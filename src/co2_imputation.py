@@ -1,8 +1,8 @@
 """CO2 sensor-failure detection and RandomForest-based restoration.
 
-Ported from notebook cells 21-28. The January-Tuesday sensor outage produces
-rows where Usage_kWh > 0 but CO2_ppm == 0; these are masked to NaN and predicted
-from a RandomForest trained on the clean rows.
+The January-Tuesday sensor outage produces rows where Usage_kWh > 0 but
+CO2_ppm == 0; these are masked to NaN and predicted from a RandomForest trained
+on the clean rows.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 
 def build_target_mask(df: pd.DataFrame) -> pd.Series:
-    """Boolean mask of corrupted CO2 readings (cell 21)."""
+    """Boolean mask of corrupted CO2 readings."""
     return (
         (df["Month"] == 1)
         & (df["Day_of_week"] == "Tuesday")
@@ -22,7 +22,7 @@ def build_target_mask(df: pd.DataFrame) -> pd.Series:
 
 
 def restore_co2(df: pd.DataFrame, random_state: int = 42) -> pd.DataFrame:
-    """Detect and restore corrupted CO2 readings (cells 24-28).
+    """Detect and restore corrupted CO2 readings.
 
     Requires the ``Hour`` feature (run :func:`preprocessing.add_time_features`
     first). Returns a copy with ``CO2_ppm`` repaired in place.

@@ -1,7 +1,6 @@
 # dashboard/sender.py
-# Ported from the original sender.py. Reads a streaming CSV row-by-row and POSTs
-# each row to the dashboard /ingest endpoint, simulating a realtime feed.
-# Data path / target URL / interval are configurable via environment variables.
+# Reads a streaming CSV row-by-row and POSTs each row to the dashboard /ingest
+# endpoint, simulating a realtime feed. Data path / URL / interval via env.
 import os
 import time
 from datetime import datetime

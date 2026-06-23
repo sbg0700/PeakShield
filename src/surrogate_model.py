@@ -1,6 +1,5 @@
 """Surrogate models: XGBoost regressors for Usage_kWh and PF_Physical.
 
-Ported from notebook cells 59 (train) and 61-62 (feature importance).
 Monotonic constraints force usage/PF to be non-decreasing in the *_Operating_Rate
 control variables, encoding the physical prior used by the optimizer.
 """
@@ -47,7 +46,7 @@ def train_surrogates(
     target_pf: str = config.TARGET_PF,
     train_split: float = config.TRAIN_SPLIT,
 ) -> Tuple[xgb.XGBRegressor, xgb.XGBRegressor, Dict[str, float]]:
-    """Train the Usage and PF surrogate models on a chronological split (cell 59).
+    """Train the Usage and PF surrogate models on a chronological split.
 
     Returns ``(model_usage, model_pf, metrics)`` where metrics holds test-set
     MAE/R2 for both targets.
@@ -84,7 +83,7 @@ def train_surrogates(
 
 
 def feature_importances(model: xgb.XGBRegressor, features: List[str]) -> pd.Series:
-    """Return feature importances as a sorted Series (cells 61-62, no plot)."""
+    """Return feature importances as a sorted Series (no plot)."""
     return pd.Series(model.feature_importances_, index=features).sort_values(ascending=False)
 
 

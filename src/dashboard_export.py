@@ -1,7 +1,7 @@
 """Dashboard streaming export: realtime cost + PSI per 15-minute step.
 
-Ported from notebook cells 97-101. Produces the slim per-row CSVs consumed by
-``dashboard/sender.py`` (final_2018ver.csv / final_2026ver.csv).
+Produces the slim per-row CSVs consumed by ``dashboard/sender.py``
+(final_2018ver.csv / final_2026ver.csv).
 """
 from __future__ import annotations
 

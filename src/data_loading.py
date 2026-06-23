@@ -1,7 +1,4 @@
-"""Raw data loading + column normalization + chronological ordering.
-
-Ported from notebook cells 3 (read), 5 (positional rename), 10 (datetime + sort).
-"""
+"""Raw data loading + column normalization + chronological ordering."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -16,8 +13,8 @@ def load_raw_steel_data(path: Optional[Path] = None) -> pd.DataFrame:
     """Load the raw 15-minute steel-industry energy CSV.
 
     The raw header varies slightly between exported versions, so columns are
-    overridden *positionally* with :data:`config.COLUMN_NAMES` exactly as the
-    original notebook does (cell 5). The ``date`` column is then parsed
+    overridden *positionally* with :data:`config.COLUMN_NAMES`. The ``date``
+    column is then parsed
     (day-first), sorted ascending, and the index reset.
     """
     path = Path(path) if path is not None else config.RAW_CSV

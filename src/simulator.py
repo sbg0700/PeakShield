@@ -1,7 +1,5 @@
 """Digital-twin optimizer: HybridFastSimulator.
 
-Ported verbatim from notebook cell 70 (logic unchanged).
-
 Two-stage optimization per 15-minute step:
   1. Grid search over a precomputed (motor x capacitor) utilization grid using the
      surrogate models, with a monthly cumulative power-factor penalty/reward.

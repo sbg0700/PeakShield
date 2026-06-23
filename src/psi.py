@@ -1,8 +1,5 @@
 """Process Stress Index (PSI) — infrastructure vs operational, and AI comparison.
 
-Ported from notebook cells 53-54 (PSI on the human/as-is data),
-cell 88 (baseline maxima), and cell 86 (AI/to-be PSI reconstruction).
-
 PSI (operational, the adopted metric):
     PSI = 0.5*Motor_Operating_Rate + 0.3*(100 - PF_Physical) + 0.2*Motor_Volatility_Scaled
 """
@@ -17,7 +14,7 @@ ROLLING_WINDOW = 4  # 1 hour at 15-minute resolution
 
 
 def add_psi(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute PSI_Infrastructure / PSI_Operational / PSI / PSI_Delta (cells 53-54).
+    """Compute PSI_Infrastructure / PSI_Operational / PSI / PSI_Delta.
 
     Requires ``Motor_Operating_Rate``, ``PF_Physical`` and ``Apparent_Power``.
     """
@@ -49,7 +46,7 @@ def add_psi(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_psi_baseline_maxima(df: pd.DataFrame) -> Dict[str, float]:
-    """Baseline (human/as-is) maxima used to scale the AI-side PSI (cell 88)."""
+    """Baseline (human/as-is) maxima used to scale the AI-side PSI."""
     return {
         "max_lagging": float(df["Lagging_Current_Reactive_Power_kVarh"].max()),
         "max_leading": float(df["Leading_Current_Reactive_Power_kVarh"].max()),
@@ -63,7 +60,7 @@ def get_psi_baseline_maxima(df: pd.DataFrame) -> Dict[str, float]:
 def calculate_psi_comparison(
     df_res: pd.DataFrame, original_max_values: Dict[str, float]
 ) -> pd.DataFrame:
-    """Reconstruct AI-side physical quantities and AI_PSI on the same scale (cell 86).
+    """Reconstruct AI-side physical quantities and AI_PSI on the same scale.
 
     ``df_res`` must contain the simulator outputs ``AI_Motor_Operating_Rate``,
     ``AI_Capacitor_Operating_Rate`` and ``AI_Usage_kWh``.

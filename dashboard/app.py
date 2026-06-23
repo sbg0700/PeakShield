@@ -1,8 +1,7 @@
 # dashboard/app.py
-# Ported from the original final_app.py. Changes vs original:
-#   - hardcoded data.go.kr SERVICE_KEY -> environment variable
-#   - data CSV path / port -> environment variables (with sensible defaults)
-# All routes and logic are otherwise preserved.
+# Flask realtime dashboard (SSE stream + monthly cost + KAU25 public-data proxy).
+# Secret key, port, and data CSV path are read from the environment (.env),
+# never hardcoded.
 import datetime
 import json
 import logging

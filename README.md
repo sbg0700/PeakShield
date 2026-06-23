@@ -4,7 +4,7 @@
 모터/콘덴서 가동률을 재스케줄링하여 **전기요금(기본료·전력량요금·역률 페널티)과 탄소배출을 최소화**하는
 디지털 트윈 시뮬레이션 프로젝트입니다.
 
-원본은 2개의 Jupyter 노트북으로 작성되었고, 이 저장소는 그 분석을 **재현 가능한 Python 파이프라인**으로 분할한 것입니다.
+분석 전 과정을 **재현 가능한 Python 파이프라인**(재사용 모듈 + 단계별 실행 스크립트)으로 구성했습니다.
 
 ---
 
@@ -41,7 +41,7 @@ steel-energy-optimization/
 │   ├─ app.py      서버(SSE 스트림 + 월별 비용 + KAU25 공공API)
 │   ├─ sender.py   결과 CSV를 1초 간격으로 /ingest 에 송신
 │   ├─ static/  templates/
-└─ notebooks/      # 원본 노트북 보존 + EDA 분리본
+└─ notebooks/      # 탐색적 분석(EDA)·시각화 노트북
 ```
 
 ## 데이터 흐름
@@ -89,7 +89,7 @@ python dashboard/sender.py    # 터미널 B
 8개 시나리오: `2018_industrial_HV_A_opt{1,2,3}`, `2026_standard`, `2026_jeju`,
 `2026_industrial_HV_A_opt{1,2,3}`. 각 시나리오는 `base_rate`, 계절별 `tou_schedule`/`unit_prices`,
 역률 규정 `pf_logic`(lag/lead target, 적용 시간대), `additional_fees`(기후·연료·기금·부가세)를 가집니다.
-노트북 기본 분석은 `*_opt3`(2018/2026)을 사용합니다.
+기본 분석은 `*_opt3`(2018/2026) 시나리오를 사용합니다.
 
 ## 데이터 출처
 
@@ -99,8 +99,8 @@ python dashboard/sender.py    # 터미널 B
 ## 알려진 의존성/제약
 
 - **`src/settlement.py`의 `kepco_bill_300kw_plus()`는 placeholder(미구현)** 입니다.
-  원본 가격 노트북에 정의가 유실되어 있어, 전압(A/B/C)×요금제(I/II/III) **조합 탐색 정산** 기능만
-  골격을 비워둔 상태입니다. 메인 ROI(`economics.calculate_advanced_financial_roi`)는 자급자족이라
-  이 함수 없이도 전체 결과가 재현됩니다. 함수 본체 확보 시 drop-in 교체하세요.
-- 한글 차트 폰트는 EDA 노트북에서만 필요합니다(`src`는 plot 미포함).
+  전압(A/B/C)×요금제(I/II/III) **조합 탐색 정산** 기능만 골격을 비워둔 상태이며,
+  메인 ROI(`economics.calculate_advanced_financial_roi`)는 자급자족이라 이 함수 없이도
+  전체 결과가 재현됩니다. 요금표 본체를 제공하면 drop-in 으로 활성화됩니다.
+- 한글 차트 폰트는 EDA·시각화에서만 필요합니다(`src`는 plot 미포함).
 - 대시보드의 공공데이터 인증키는 환경변수(`DATA_GO_KR_SERVICE_KEY`)로 분리되어 있습니다.

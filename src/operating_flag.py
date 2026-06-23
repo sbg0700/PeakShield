@@ -1,6 +1,5 @@
 """Operating-state flag derived from CO2 + motor utilization.
 
-Ported from notebook cell 30.
   0 = OFF        (no CO2 -> not operating)
   2 = Production  (CO2 present AND motor utilization > 5%)
   1 = Wait/Idle   (default)
@@ -14,7 +13,7 @@ MOTOR_PRODUCTION_THRESHOLD = 5.0
 
 
 def add_operating_flag(df: pd.DataFrame) -> pd.DataFrame:
-    """Add the 3-state ``Is_Operating_Flag`` column (cell 30).
+    """Add the 3-state ``Is_Operating_Flag`` column.
 
     Requires ``CO2_ppm`` (restored) and ``Motor_Operating_Rate`` (power feature).
     """
