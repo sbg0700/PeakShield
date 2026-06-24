@@ -403,100 +403,13 @@
          VIEW 2) 공정 흐름
          ========================= -->
 	<section data-view="process" class="space-y-0">
-      <div id="twinStage">
-        <div id="twinMapContainer">
-          <div class="factory-wrapper">
-            <div class="map-relative-area">
-              <img class="h-full w-auto object-contain opacity-40" src="{{ url_for('static', filename='img/process_map.png') }}" alt="factory">
-
-              <div id="card-stage-1" class="parameter-card card-cyan" style="top: 15%; left: 12%;" onclick="toggleControl('stage-1')">
-                <div class="flex justify-between text-[10px] font-bold text-cyan-400 mb-1">
-                  <span>STAGE 01</span><span class="animate-pulse">● LIVE</span>
-                </div>
-                <div class="text-white font-black text-2xl tabular-nums" id="val-stage-1">-</div>
-                <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Iron Ore Feed (ton/h)</div>
-              </div>
-
-              <div id="card-stage-2" class="parameter-card card-indigo" style="top: 42%; left: 48%;" onclick="toggleControl('stage-2')">
-                <div class="flex justify-between text-[10px] font-bold text-indigo-400 mb-1">
-                  <span>STAGE 02</span><span class="animate-pulse">● LIVE</span>
-                </div>
-                <div class="text-white font-black text-2xl tabular-nums" id="val-stage-2">-</div>
-                <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Furnace Temp (°C)</div>
-              </div>
-
-              <div id="card-stage-3" class="parameter-card card-emerald" style="top: 58%; left: 72%;" onclick="toggleControl('stage-3')">
-                <div class="flex justify-between text-[10px] font-bold text-emerald-400 mb-1">
-                  <span>STAGE 03</span><span class="animate-pulse">● LIVE</span>
-                </div>
-                <div class="text-white font-black text-2xl tabular-nums" id="val-stage-3">-</div>
-                <div class="text-[10px] text-slate-500 uppercase tracking-tighter">Motor Rate (%)</div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-        <aside id="twinSidebar">
-          <div id="resizer"></div>
-          <div class="p-6 border-b border-slate-800 flex justify-between items-start min-w-[320px] bg-slate-900 text-white z-50">
-            <div>
-              <h3 class="font-bold text-sm tracking-widest uppercase">System Config</h3>
-              <button onclick="clearAllStages()" class="text-[9px] text-slate-500 hover:text-red-400 font-bold mt-1 transition-colors">RESET ALL PANELS</button>
-            </div>
-            <button onclick="closeSidebar()" class="text-slate-400 hover:text-white p-2 -mr-2 transition-transform hover:rotate-90">✕</button>
-          </div>
-          <div id="accordionContainer" class="flex-1 overflow-y-auto p-4 space-y-4 min-w-[320px] custom-scrollbar"></div>
-        </aside>
-      </div>
-
-      <div id="alarmPanel">
-        <div class="alarm-header px-5 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
-          <div class="flex items-center gap-2">
-            <span id="alarmBell" class="text-amber-500 text-lg">🔔</span>
-            <h4 class="text-white font-bold text-xs uppercase tracking-widest">System Log & Alerts</h4>
-          </div>
-          <div class="flex items-center gap-4">
-            <span id="alarmStatus" class="text-[10px] text-emerald-500 font-bold tracking-tighter animate-pulse">● SYSTEM NORMAL</span>
-            <span id="alarmCount" class="text-[10px] text-slate-500 font-mono">0 events</span>
-          </div>
-        </div>
-        <div id="alarmList" class="custom-scrollbar p-4 flex-1 overflow-y-auto">
-          <div id="emptyMsg" class="h-full flex items-center justify-center">
-            <p class="text-slate-600 text-xs italic tracking-tight">No critical alerts detected...</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="reportPanel" class="hidden mt-8 p-8 bg-slate-900 border-t-4 border-cyan-500 rounded-b-xl shadow-2xl transition-all relative z-50">
-        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-          <h2 class="text-2xl font-black text-white">⚙️ AI 공정 시뮬레이션 리포트</h2>
-          <span id="reportTime" class="text-slate-400 font-mono text-sm"></span>
-        </div>
-        
-        <div class="grid grid-cols-3 gap-6 mb-6">
-          <div class="p-4 bg-black/40 rounded-lg">
-            <div class="text-xs text-slate-400 font-bold mb-1">예측 전력 사용량</div>
-            <div id="rep-usage" class="text-2xl font-black text-white">0 kWh</div>
-          </div>
-          <div class="p-4 bg-black/40 rounded-lg">
-            <div class="text-xs text-slate-400 font-bold mb-1">예상 공정 스트레스 (PSI)</div>
-            <div id="rep-psi" class="text-2xl font-black text-cyan-400">0</div>
-          </div>
-          <div class="p-4 bg-black/40 rounded-lg">
-            <div class="text-xs text-slate-400 font-bold mb-1">CO2 저감 효과</div>
-            <div id="rep-co2" class="text-2xl font-black text-emerald-400">0 kg</div>
-          </div>
-        </div>
-        
-        <div class="bg-slate-800/50 p-6 rounded-lg">
-          <h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-widest flex items-center gap-2">
-            <span class="text-cyan-400">💡</span> AI Expert Insights
-          </h3>
-          <ul id="rep-insights" class="text-slate-300 text-sm space-y-2 leading-relaxed">
-            </ul>
-        </div>
-      </div>
+      <!-- 공정 흐름 대시보드(별도 앱)를 그대로 임베드. 탭 첫 클릭 시 로드 -->
+      <iframe id="process-frame"
+              data-src="{{ process_app_url }}"
+              title="공정 흐름 대시보드"
+              loading="lazy"
+              style="width:100%; height:calc(100vh - 220px); min-height:640px; border:0; border-radius:16px; background:#0b1220;">
+      </iframe>
     </section>
     <!-- =========================
          VIEW 3) CO2
@@ -705,6 +618,18 @@
 
     // Flask에서 데이터를 정상 수신 중인지 확인하는 로그
     console.log("Initial Cost Data Loaded:", window.COST_TREND_DATA);
+  </script>
+  <script>
+    // 공정 탭 첫 클릭 시에만 별도 공정 앱(iframe)을 로드
+    (function () {
+      var btn = document.querySelector('.tab-btn[data-tab="process"]');
+      var frame = document.getElementById('process-frame');
+      if (btn && frame) {
+        btn.addEventListener('click', function () {
+          if (!frame.getAttribute('src') && frame.dataset.src) frame.setAttribute('src', frame.dataset.src);
+        });
+      }
+    })();
   </script>
 </body>
 </html>

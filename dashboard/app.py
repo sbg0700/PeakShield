@@ -40,6 +40,10 @@ DASHBOARD_PORT = int(os.environ.get("DASHBOARD_PORT", "5001"))
 DATA_CSV = os.environ.get(
     "DASHBOARD_DATA_CSV", str(REPO_ROOT / "data" / "processed" / "final_2026ver.csv")
 )
+# 공정(process) 탭에서 임베드할 별도 공정 앱 주소 (기본: 로컬 4444)
+PROCESS_APP_URL = os.environ.get(
+    "PROCESS_APP_URL", f"http://127.0.0.1:{os.environ.get('DASHBOARD_PROCESS_PORT', '4444')}"
+)
 
 app = Flask(__name__)
 
@@ -206,6 +210,7 @@ def home():
         processes=[],
         monthly_human_data=monthly_human_data,
         monthly_ai_data=monthly_ai_data,
+        process_app_url=PROCESS_APP_URL,
     )
 
 
