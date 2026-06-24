@@ -3,54 +3,137 @@
 Finds the cheapest voltage (A/B/C) x plan (I/II/III) combination per month and
 compares the pre- vs post-optimization bill.
 
-⚠️ The inner tariff calculator ``kepco_bill_300kw_plus()`` and its ``BillInputs``
-payload are a placeholder (not yet implemented). Everything around it —
-season/TOU assignment, monthly bill-input aggregation, contract recommendation,
-and the combination-search settlement — is complete. Provide a real
-``kepco_bill_300kw_plus`` (and extend ``BillInputs`` if needed) to enable
-``settlement_kepco_after_optimization``.
-
 The main ROI path does NOT use this module — see
 ``economics.calculate_advanced_financial_roi``, which is self-contained.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable, Literal, Tuple
 
 import numpy as np
 import pandas as pd
 
+Season = Literal["summer", "spring_fall", "winter"]
+Voltage = Literal["A", "B", "C"]
+Plan = Literal["I", "II", "III"]
+
 
 # ---------------------------------------------------------------------------
-# Tariff calculator payload + placeholder (not yet implemented)
+# Rounding helpers (per KEPCO billing rules)
 # ---------------------------------------------------------------------------
+def round_half_up_won(x: float) -> int:
+    """원 단위 4사5입 (소수 첫째에서 반올림)."""
+    return int(x + 0.5)
+
+
+def truncate_under_10won(x: float) -> int:
+    """10원 미만 절사."""
+    return int(x // 10 * 10)
+
+
+# ---------------------------------------------------------------------------
+# 2025.04.01 시행 요금표: 계약전력 300kW 이상 산업용(을), 고압 A/B/C × 선택 I/II/III
+# base_kw: 기본요금(원/kW), kwh: 계절별 시간대(경 off / 중 mid / 최 peak) 단가(원/kWh)
+# ---------------------------------------------------------------------------
+RATES_300KW_PLUS = {
+    "A": {  # 고압 A
+        "I":  {"base_kw": 7220, "kwh": {"summer": {"off": 116.4, "mid": 169.3, "peak": 251.4},
+                                        "spring_fall": {"off": 116.4, "mid": 138.9, "peak": 169.6},
+                                        "winter": {"off": 123.4, "mid": 169.5, "peak": 227.0}}},
+        "II": {"base_kw": 8320, "kwh": {"summer": {"off": 110.9, "mid": 163.8, "peak": 245.9},
+                                        "spring_fall": {"off": 110.9, "mid": 133.4, "peak": 164.1},
+                                        "winter": {"off": 117.9, "mid": 164.0, "peak": 221.5}}},
+        "III":{"base_kw": 9810, "kwh": {"summer": {"off": 110.0, "mid": 163.2, "peak": 233.5},
+                                        "spring_fall": {"off": 110.0, "mid": 132.1, "peak": 155.8},
+                                        "winter": {"off": 117.3, "mid": 163.4, "peak": 210.3}}},
+    },
+    "B": {  # 고압 B
+        "I":  {"base_kw": 6630, "kwh": {"summer": {"off": 126.3, "mid": 178.6, "peak": 259.8},
+                                        "spring_fall": {"off": 126.3, "mid": 148.6, "peak": 178.9},
+                                        "winter": {"off": 133.3, "mid": 178.6, "peak": 234.8}}},
+        "II": {"base_kw": 7380, "kwh": {"summer": {"off": 122.5, "mid": 174.8, "peak": 256.0},
+                                        "spring_fall": {"off": 122.5, "mid": 144.8, "peak": 175.1},
+                                        "winter": {"off": 129.5, "mid": 174.8, "peak": 231.0}}},
+        "III":{"base_kw": 8190, "kwh": {"summer": {"off": 120.8, "mid": 173.1, "peak": 254.4},
+                                        "spring_fall": {"off": 120.8, "mid": 143.2, "peak": 173.5},
+                                        "winter": {"off": 127.9, "mid": 173.1, "peak": 229.3}}},
+    },
+    "C": {  # 고압 C
+        "I":  {"base_kw": 6590, "kwh": {"summer": {"off": 125.8, "mid": 178.7, "peak": 259.6},
+                                        "spring_fall": {"off": 125.8, "mid": 148.7, "peak": 179.1},
+                                        "winter": {"off": 132.7, "mid": 178.3, "peak": 234.9}}},
+        "II": {"base_kw": 7520, "kwh": {"summer": {"off": 121.1, "mid": 174.0, "peak": 254.9},
+                                        "spring_fall": {"off": 121.1, "mid": 144.0, "peak": 174.4},
+                                        "winter": {"off": 128.0, "mid": 173.6, "peak": 230.2}}},
+        "III":{"base_kw": 8090, "kwh": {"summer": {"off": 120.0, "mid": 172.9, "peak": 253.8},
+                                        "spring_fall": {"off": 120.0, "mid": 142.9, "peak": 173.3},
+                                        "winter": {"off": 126.9, "mid": 172.5, "peak": 229.1}}},
+    },
+}
+
+
 @dataclass
 class BillInputs:
     """Inputs for a single monthly KEPCO bill (>=300kW high-voltage)."""
-    billing_demand_kw: float
-    kwh_off: float
-    kwh_mid: float
-    kwh_peak: float
-    season: str
-    voltage: str
-    plan: str
+    billing_demand_kw: float  # 청구(최대)수요전력 kW — 기본요금에 곱해지는 값
+    kwh_off: float            # 경부하 사용량(kWh)
+    kwh_mid: float            # 중간부하 사용량(kWh)
+    kwh_peak: float           # 최대부하 사용량(kWh)
+    season: Season            # summer / spring_fall / winter
+    voltage: Voltage          # A / B / C
+    plan: Plan                # I / II / III
+    # 기후환경요금·연료비조정 단가는 변동값이라 입력으로 받음
     climate_unit_won_per_kwh: float = 0.0
     fuel_adj_unit_won_per_kwh: float = 0.0
 
 
-def kepco_bill_300kw_plus(x: "BillInputs") -> Dict[str, float]:
-    """Compute a KEPCO industrial (>=300kW) monthly bill from :class:`BillInputs`.
+def kepco_bill_300kw_plus(x: "BillInputs") -> Dict[str, int]:
+    """KEPCO 산업용(을) 300kW 이상 월 청구액 계산.
 
-    PLACEHOLDER (not yet implemented). It must return at least:
-        {"total_bill_won": ..., "base_charge_won": ..., "energy_charge_won": ...}
+    반환: base/energy/climate/fuel/electric/vat/fund/total 각 원(整) 단위.
     """
-    raise NotImplementedError(
-        "kepco_bill_300kw_plus() is not yet implemented. Provide the tariff table "
-        "lookup (voltage A/B/C x plan I/II/III base+energy charges) to enable "
-        "settlement_kepco_after_optimization(). The main ROI path "
-        "(economics.calculate_advanced_financial_roi) does not need this."
+    rate = RATES_300KW_PLUS[x.voltage][x.plan]
+    base_rate = rate["base_kw"]
+    unit = rate["kwh"][x.season]
+
+    # 1) 기본요금
+    base_charge = x.billing_demand_kw * base_rate
+
+    # 2) 전력량요금
+    energy_charge = (
+        x.kwh_off * unit["off"]
+        + x.kwh_mid * unit["mid"]
+        + x.kwh_peak * unit["peak"]
     )
+
+    # 3) 기후환경요금 & 연료비조정요금
+    total_kwh = x.kwh_off + x.kwh_mid + x.kwh_peak
+    climate_charge = x.climate_unit_won_per_kwh * total_kwh
+    fuel_adj_charge = x.fuel_adj_unit_won_per_kwh * total_kwh
+
+    # 4) 세전 전기요금
+    electric_charge = base_charge + energy_charge + climate_charge + fuel_adj_charge
+
+    # 5) 부가가치세 (10%)
+    vat = round_half_up_won(electric_charge * 0.10)
+
+    # 6) 전력산업기반기금 (2.7%, 10원 미만 절사)
+    fund = truncate_under_10won(electric_charge * 0.027)
+
+    # 7) 최종요금
+    total_bill = round_half_up_won(electric_charge) + vat + fund
+
+    return {
+        "base_charge_won": round_half_up_won(base_charge),
+        "energy_charge_won": round_half_up_won(energy_charge),
+        "climate_charge_won": round_half_up_won(climate_charge),
+        "fuel_adj_charge_won": round_half_up_won(fuel_adj_charge),
+        "electric_charge_won": round_half_up_won(electric_charge),
+        "vat_won": vat,
+        "fund_won": fund,
+        "total_bill_won": total_bill,
+    }
 
 
 # ---------------------------------------------------------------------------

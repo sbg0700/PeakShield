@@ -98,9 +98,9 @@ python dashboard/sender.py    # 터미널 B
 
 ## 알려진 의존성/제약
 
-- **`src/settlement.py`의 `kepco_bill_300kw_plus()`는 placeholder(미구현)** 입니다.
-  전압(A/B/C)×요금제(I/II/III) **조합 탐색 정산** 기능만 골격을 비워둔 상태이며,
-  메인 ROI(`economics.calculate_advanced_financial_roi`)는 자급자족이라 이 함수 없이도
-  전체 결과가 재현됩니다. 요금표 본체를 제공하면 drop-in 으로 활성화됩니다.
+- **`src/settlement.py`의 `kepco_bill_300kw_plus()`** 는 2025.04.01 시행 300kW 이상
+  산업용(을) 요금표(고압 A/B/C × 선택 I/II/III)로 구현되어, 월별 **최저비용 조합 탐색
+  정산**(`settlement_kepco_after_optimization`)이 동작합니다. 이는 메인 ROI
+  (`economics.calculate_advanced_financial_roi`)와 **독립적인 정밀 정산 도구**입니다.
 - 한글 차트 폰트는 EDA·시각화에서만 필요합니다(`src`는 plot 미포함).
 - 대시보드의 공공데이터 인증키는 환경변수(`DATA_GO_KR_SERVICE_KEY`)로 분리되어 있습니다.
