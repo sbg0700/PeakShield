@@ -1,52 +1,61 @@
-# Steel Process Energy-Cost Optimization
+# PeakShield — Steel-Process Electricity Peak-Shaving & Cost Optimization
 
-철강 공정의 15분 단위 전력 사용량 데이터를 기반으로, **Surrogate(대리) ML 모델 + 베이지안 최적화(Optuna)** 로
-모터/콘덴서 가동률을 재스케줄링하여 **전기요금(기본료·전력량요금·역률 페널티)과 탄소배출을 최소화**하는
-디지털 트윈 시뮬레이션 프로젝트입니다.
+*English · [한국어](README.ko.md)*
 
-분석 전 과정을 **재현 가능한 Python 파이프라인**(재사용 모듈 + 단계별 실행 스크립트)으로 구성했습니다.
+A digital-twin simulation that takes 15-minute steel-process electricity data and, using
+**surrogate ML models + Bayesian optimization (Optuna)**, re-schedules motor/capacitor
+utilization to **minimize the electricity bill (base + energy + power-factor penalty) and
+CO₂ emissions**.
+
+The whole analysis is packaged as a **reproducible Python pipeline** — reusable modules plus
+ordered entry-point scripts.
+
+## System Architecture
+
+![PeakShield architecture](docs/architecture.png)
 
 ---
 
-## 프로젝트 구조
+## Project layout
 
 ```
-steel-energy-optimization/
+PeakShield/
 ├─ config/
-│   └─ electricity_config_master.json   # 한전 요금제(8개 시나리오): TOU/단가/역률규정/base_rate
+│   └─ electricity_config_master.json   # 8 KEPCO tariff scenarios: TOU / unit prices / PF rules / base_rate
 ├─ data/
-│   ├─ raw/        Steel_industry_data.csv      # 입력 (UCI Steel Industry Energy, 35,040행)
-│   └─ processed/  # 파이프라인 산출물 (gitignore)
-├─ models/         # 학습된 XGBoost 모델 (gitignore)
-├─ reports/        # 평가 그림/표 (gitignore)
-├─ src/            # 재사용 모듈 (plot 없음, 순수 로직)
-│   ├─ config.py             경로·컬럼명·피처 목록·상수
-│   ├─ data_loading.py       CSV 로드 + 컬럼 재명명 + 시간 정렬
-│   ├─ preprocessing.py      시간/순환(sin·cos)/전력 파생 피처
-│   ├─ co2_imputation.py     센서 고장(1월 화요일 CO2=0) RandomForest 복원
-│   ├─ operating_flag.py     가동상태 플래그(0 OFF / 1 Wait / 2 Production)
-│   ├─ psi.py                공정 스트레스 지수(PSI) 산출 + AI 전후 비교
-│   ├─ surrogate_model.py    Usage_kWh·PF_Physical XGBoost 학습/저장/평가
-│   ├─ simulator.py          HybridFastSimulator (그리드 사전연산 + Optuna 미세조정)
-│   ├─ economics.py          한전 역률 페널티·재무 ROI·실시간 요금
-│   ├─ settlement.py         전압/요금제 조합 최저비용 정산 (kepco_bill 구현)
-│   └─ dashboard_export.py   대시보드용 스트리밍 CSV 생성
-├─ scripts/        # 실행 진입점 (순서대로)
+│   ├─ raw/        Steel_industry_data.csv      # input (UCI Steel Industry Energy, 35,040 rows)
+│   └─ processed/  # pipeline artifacts (gitignored)
+├─ models/         # trained XGBoost models (gitignored)
+├─ reports/        # evaluation tables/figures (gitignored)
+├─ src/            # reusable modules (pure logic, no plotting)
+│   ├─ config.py             paths · column names · feature list · constants
+│   ├─ data_loading.py       load CSV + rename columns + chronological sort
+│   ├─ preprocessing.py      time / cyclic (sin·cos) / power-derived features
+│   ├─ co2_imputation.py     RandomForest restore of the Jan-Tuesday CO2 sensor outage
+│   ├─ operating_flag.py     operating-state flag (0 OFF / 1 Wait / 2 Production)
+│   ├─ psi.py                Process Stress Index (PSI) + AI before/after comparison
+│   ├─ surrogate_model.py    XGBoost training/save/eval for Usage_kWh & PF_Physical
+│   ├─ simulator.py          HybridFastSimulator (grid precompute + Optuna fine-tune)
+│   ├─ economics.py          KEPCO PF penalty · financial ROI · realtime cost
+│   ├─ settlement.py         cheapest voltage/plan settlement (kepco_bill implemented)
+│   └─ dashboard_export.py   build streaming CSVs for the dashboard
+├─ scripts/        # entry points (run in order)
 │   ├─ 01_build_features.py
 │   ├─ 02_train_surrogate.py
 │   ├─ 03_run_optimization.py
 │   ├─ 04_evaluate_roi.py
 │   └─ 05_export_dashboard.py
-├─ dashboard/      # Flask 실시간 대시보드 (단일 페이지 3탭)
-│   ├─ app.py      전기료·CO2 서버 :5001 — "공정" 탭은 4444를 iframe 임베드
-│   ├─ sender.py   결과 CSV를 1초 간격으로 /ingest 에 송신
+├─ dashboard/      # Flask realtime dashboard (single page, 3 tabs)
+│   ├─ app.py      Energy + CO2 server :5001 — the "Process" tab embeds :4444 via iframe
+│   ├─ sender.py   replays the result CSV to /ingest every second
 │   ├─ static/  templates/
-│   └─ process_app/   # 공정 흐름 전용 서버 :4444 (5001의 공정 탭이 임베드)
+│   └─ process_app/   # process-flow server :4444 (embedded by the 5001 Process tab)
 │       ├─ app.py  static/  templates/
-└─ notebooks/      # 탐색적 분석(EDA)·시각화 노트북
+├─ docs/           # architecture diagram (+ generator script)
+└─ notebooks/      # exploratory (EDA) / visualization notebooks
 ```
 
-## 데이터 흐름
+## Data flow
 
 ```
 data/raw/Steel_industry_data.csv
@@ -56,7 +65,7 @@ data/processed/features.parquet  (+ reactive_maxima.json)
         │  02_train_surrogate.py
         ▼
 models/usage_model.json, models/pf_model.json
-        │  03_run_optimization.py   (config 시나리오별)
+        │  03_run_optimization.py   (per config scenario)
         ▼
 data/processed/sim_<scenario>.parquet
         │  04_evaluate_roi.py        05_export_dashboard.py
@@ -64,51 +73,55 @@ data/processed/sim_<scenario>.parquet
 reports/ + final_opt3_kepco_ready.csv   final_2018ver.csv / final_2026ver.csv
                                                 │  dashboard/sender.py → app.py
                                                 ▼
-                                        실시간 대시보드 (http://127.0.0.1:5001)
+                                        realtime dashboard (http://127.0.0.1:5001)
 ```
 
-## 빠른 시작
+## Quick start
 
 ```bash
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 
-# 전체 파이프라인 (기본 시나리오: 2018·2026 opt3)
+# full pipeline (default scenarios: 2018 & 2026 opt3)
 python scripts/01_build_features.py
 python scripts/02_train_surrogate.py
 python scripts/03_run_optimization.py
 python scripts/04_evaluate_roi.py
 python scripts/05_export_dashboard.py
 
-# 대시보드 — 세 앱/프로세스를 모두 실행 (터미널 3개)
-cp .env.example .env                  # DATA_GO_KR_SERVICE_KEY 채우기
-python dashboard/app.py               # 전기료·CO2 서버 → http://127.0.0.1:5001
-python dashboard/sender.py            # 실시간 송신
-python dashboard/process_app/app.py   # 공정 서버 → http://127.0.0.1:4444
+# dashboard — run all three (three terminals)
+cp .env.example .env                  # fill in DATA_GO_KR_SERVICE_KEY
+python dashboard/app.py               # Energy + CO2 server → http://127.0.0.1:5001
+python dashboard/sender.py            # realtime feed
+python dashboard/process_app/app.py   # Process server → http://127.0.0.1:4444
 ```
 
-> 셋을 모두 띄운 뒤 **http://127.0.0.1:5001 한 곳**에 접속하면, 단일 페이지의 3개 탭
-> (전기료·공정·CO2)이 동작합니다. **"공정" 탭은 4444 앱을 iframe으로 임베드**하여
-> (탭 첫 클릭 시 로드) 구현 형식이 다른 두 앱을 한 화면처럼 보여줍니다. 임베드 주소는
-> `PROCESS_APP_URL` 환경변수로 변경 가능하며, 단일 origin·포트가 필요하면 리버스 프록시(Nginx 등)도 옵션입니다.
+> With all three running, open **http://127.0.0.1:5001** — a single page with three tabs
+> (Energy · Process · CO2). The **"Process" tab embeds the :4444 app via iframe** (loaded on
+> first click), presenting two differently-built apps as one dashboard. The embed URL is
+> configurable via `PROCESS_APP_URL`; for a single origin/port, a reverse proxy (Nginx, etc.)
+> is also an option.
 
-## 요금 시나리오 (config/electricity_config_master.json)
+## Tariff scenarios (config/electricity_config_master.json)
 
-8개 시나리오: `2018_industrial_HV_A_opt{1,2,3}`, `2026_standard`, `2026_jeju`,
-`2026_industrial_HV_A_opt{1,2,3}`. 각 시나리오는 `base_rate`, 계절별 `tou_schedule`/`unit_prices`,
-역률 규정 `pf_logic`(lag/lead target, 적용 시간대), `additional_fees`(기후·연료·기금·부가세)를 가집니다.
-기본 분석은 `*_opt3`(2018/2026) 시나리오를 사용합니다.
+8 scenarios: `2018_industrial_HV_A_opt{1,2,3}`, `2026_standard`, `2026_jeju`,
+`2026_industrial_HV_A_opt{1,2,3}`. Each has `base_rate`, seasonal `tou_schedule` / `unit_prices`,
+power-factor rules `pf_logic` (lag/lead target, active hours), and `additional_fees`
+(climate · fuel · fund · VAT). The default analysis uses `*_opt3` (2018 / 2026).
 
-## 데이터 출처
+## Data source
 
 `data/raw/Steel_industry_data.csv` — UCI Machine Learning Repository,
-*Steel Industry Energy Consumption* (DAEWOO Steel Co., 2018, 15분 단위).
+*Steel Industry Energy Consumption* (DAEWOO Steel Co., 2018, 15-minute resolution).
 
-## 알려진 의존성/제약
+## Notes & known constraints
 
-- **`src/settlement.py`의 `kepco_bill_300kw_plus()`** 는 2025.04.01 시행 300kW 이상
-  산업용(을) 요금표(고압 A/B/C × 선택 I/II/III)로 구현되어, 월별 **최저비용 조합 탐색
-  정산**(`settlement_kepco_after_optimization`)이 동작합니다. 이는 메인 ROI
-  (`economics.calculate_advanced_financial_roi`)와 **독립적인 정밀 정산 도구**입니다.
-- 한글 차트 폰트는 EDA·시각화에서만 필요합니다(`src`는 plot 미포함).
-- 대시보드의 공공데이터 인증키는 환경변수(`DATA_GO_KR_SERVICE_KEY`)로 분리되어 있습니다.
+- **`src/settlement.py` → `kepco_bill_300kw_plus()`** is implemented with the 2025-04-01
+  industrial (≥300kW) tariff table (high-voltage A/B/C × plan I/II/III), so the monthly
+  cheapest-combination settlement (`settlement_kepco_after_optimization`) works. It is an
+  **independent, more rigorous settlement tool** separate from the main ROI
+  (`economics.calculate_advanced_financial_roi`).
+- Korean chart fonts are only needed for EDA/visualization (`src` has no plotting).
+- The dashboard's public-data API key is kept in an environment variable
+  (`DATA_GO_KR_SERVICE_KEY`), never hardcoded.
+- Regenerate the architecture diagram with `python docs/make_architecture.py`.
