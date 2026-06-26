@@ -1,0 +1,5 @@
+# Exclude Jupyter notebooks from GitHub language statistics.
+# These are exploratory EDA/visualization notebooks; the production code
+# lives in src/ and scripts/ (.py). Their figures are exported to the
+# presentation deck, so the notebooks are kept as-is for reference only.
+*.ipynb linguist-documentation
