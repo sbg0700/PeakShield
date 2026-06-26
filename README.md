@@ -129,6 +129,6 @@ power-factor rules `pf_logic` (lag/lead target, active hours), and `additional_f
 
 A 3-person team, split across data/digital-twin, economics & frontend, and modeling.
 
-- **Myeongseon Kim ([@myeongsun125](https://github.com/myeongsun125))** — Project lead & data/digital-twin. Led the team and overall project direction. Technical work: feature engineering (missing-value imputation, process-state modeling), EDA & data visualization, the SVG-based digital-twin process tab, and the UI architecture.
+- **Myeongseon Kim ([@myeongsun125](https://github.com/myeongsun125))** — Project lead & data/digital-twin. Led the team and overall project direction, and drove the final presentation and project narrative. Technical work: feature engineering (missing-value imputation, process-state modeling), EDA & data visualization, the SVG-based digital-twin process tab, and the UI architecture.
 - **Byeonggab Song ([@sbg0700](https://github.com/sbg0700))** — Economics engine & frontend. Target feature engineering, the KEPCO electricity-cost functions, carbon-credit price API integration, and the dashboard frontend (electricity & carbon tabs).
 - **Youngmin Kwon ([@Kwonym0814](https://github.com/Kwonym0814))** — Modeling & optimization. XGBoost surrogate hyperparameter search (Grid-search · Optuna) and model fine-tuning.
