@@ -2,22 +2,34 @@
 
 *[English](README.md) · 한국어*
 
+> **기술 스택:** Python · pandas · NumPy · scikit-learn · XGBoost · Optuna · Flask · Chart.js · Tailwind CSS
+
 철강 공정의 15분 단위 전력 사용량 데이터를 기반으로, **Surrogate(대리) ML 모델 + 베이지안 최적화(Optuna)** 로
 모터/콘덴서 가동률을 재스케줄링하여 **전기요금(기본료·전력량요금·역률 페널티)과 탄소배출을 최소화**하는
 디지털 트윈 시뮬레이션 프로젝트입니다.
 
 분석 전 과정을 **재현 가능한 Python 파이프라인**(재사용 모듈 + 단계별 실행 스크립트)으로 구성했습니다.
 
+## 주요 결과
+
+> 기본 시나리오(`*_opt3`, 2018·2026) 기준. 파이프라인 산출물(`reports/`, `data/processed/sim_*.parquet`)로 검증.
+
+- **피크 수요 −15%** — 629 → 531 kW (계약전력 660 kW)
+- **역률 페널티 −6%** — 5,095 → 4,788 구간 (15분; ≈1,274 → 1,197시간)
+- **공정 안정성** — PSI(평균) ≈39 → ≈15
+- **순 ROI** — 약 ₩4.6M/년 (2018) · 약 ₩1.7M/년 (2026)
+- **대리모델 정확도** — R² 0.94 / 0.86 (Usage_kWh / PF_Physical)
+
 ## 시스템 아키텍처
 
-![PeakShield 아키텍처](presentation/1_PeakShield_Architecture_final_ko.png)
+![PeakShield 아키텍처](docs/architecture.ko.png)
 
 ---
 
 ## 프로젝트 구조
 
 ```
-steel-energy-optimization/
+PeakShield/
 ├─ config/
 │   └─ electricity_config_master.json   # 한전 요금제(8개 시나리오): TOU/단가/역률규정/base_rate
 ├─ data/
@@ -49,6 +61,7 @@ steel-energy-optimization/
 │   ├─ static/  templates/
 │   └─ process_app/   # 공정 흐름 전용 서버 :4444 (5001의 공정 탭이 임베드)
 │       ├─ app.py  static/  templates/
+├─ docs/           # 아키텍처 다이어그램 (en / ko)
 └─ notebooks/      # 탐색적 분석(EDA)·시각화 노트북
 ```
 
@@ -126,3 +139,7 @@ python dashboard/process_app/app.py   # 공정 서버 → http://127.0.0.1:4444
 - **김명선 ([@myeongsun125](https://github.com/myeongsun125))** — 프로젝트 리드 & 데이터/디지털 트윈. 팀을 이끌며 프로젝트 방향과 최종 발표·프로젝트 내러티브를 주도. 기술 기여: 피처 엔지니어링(결측치 보간·공정상태 모델링), EDA·데이터 시각화, SVG 기반 디지털 트윈 공정 탭, UI 아키텍처 설계.
 - **송병갑 ([@sbg0700](https://github.com/sbg0700))** — 경제성 엔진 & 프론트엔드. 타겟 피처 엔지니어링, KEPCO 전기요금 산출 함수, 탄소배출권 가격 API 연동, 대시보드 프론트엔드(전기료·탄소 탭).
 - **권영민 ([@Kwonym0814](https://github.com/Kwonym0814))** — 모델링 & 최적화. XGBoost 대리모델 하이퍼파라미터 탐색(Grid-search · Optuna), 모델 파인튜닝.
+
+## 라이선스
+
+이 프로젝트는 MIT 라이선스를 따릅니다 — 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.

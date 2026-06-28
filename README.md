@@ -2,6 +2,8 @@
 
 *English · [한국어](README.ko.md)*
 
+> **Stack:** Python · pandas · NumPy · scikit-learn · XGBoost · Optuna · Flask · Chart.js · Tailwind CSS
+
 A digital-twin simulation that takes 15-minute steel-process electricity data and, using
 **surrogate ML models + Bayesian optimization (Optuna)**, re-schedules motor/capacitor
 utilization to **minimize the electricity bill (base + energy + power-factor penalty) and
@@ -10,9 +12,19 @@ CO₂ emissions**.
 The whole analysis is packaged as a **reproducible Python pipeline** — reusable modules plus
 ordered entry-point scripts.
 
+## Key Results
+
+> Default scenarios (`*_opt3`, 2018 & 2026); verified against the pipeline outputs (`reports/`, `data/processed/sim_*.parquet`).
+
+- **Peak demand −15%** — 629 → 531 kW (contract 660 kW)
+- **PF-penalty −6%** — 5,095 → 4,788 penalty intervals (15-min; ≈1,274 → 1,197 h)
+- **Process stability** — PSI (mean) ≈39 → ≈15
+- **Net ROI** — ≈₩4.6M/yr (2018) · ≈₩1.7M/yr (2026)
+- **Surrogate fidelity** — R² 0.94 / 0.86 (Usage_kWh / PF_Physical)
+
 ## System Architecture
 
-![PeakShield architecture](presentation/1_PeakShield_Architecture_final_en.png)
+![PeakShield architecture](docs/architecture.en.png)
 
 ---
 
@@ -51,7 +63,7 @@ PeakShield/
 │   ├─ static/  templates/
 │   └─ process_app/   # process-flow server :4444 (embedded by the 5001 Process tab)
 │       ├─ app.py  static/  templates/
-├─ presentation/   # architecture diagrams (en / ko)
+├─ docs/           # architecture diagrams (en / ko)
 └─ notebooks/      # exploratory (EDA) / visualization notebooks
 ```
 
@@ -129,6 +141,10 @@ power-factor rules `pf_logic` (lag/lead target, active hours), and `additional_f
 
 A 3-person team, split across data/digital-twin, economics & frontend, and modeling.
 
-- **Myeongseon Kim ([@myeongsun125](https://github.com/myeongsun125))** — Project lead & data/digital-twin. Led the team and overall project direction, and drove the final presentation and project narrative. Technical work: feature engineering (missing-value imputation, process-state modeling), EDA & data visualization, the SVG-based digital-twin process tab, and the UI architecture.
+- **Myeongsun Kim ([@myeongsun125](https://github.com/myeongsun125))** — Project lead & data/digital-twin. Led the team and overall project direction, and drove the final presentation and project narrative. Technical work: feature engineering (missing-value imputation, process-state modeling), EDA & data visualization, the SVG-based digital-twin process tab, and the UI architecture.
 - **Byeonggab Song ([@sbg0700](https://github.com/sbg0700))** — Economics engine & frontend. Target feature engineering, the KEPCO electricity-cost functions, carbon-credit price API integration, and the dashboard frontend (electricity & carbon tabs).
 - **Youngmin Kwon ([@Kwonym0814](https://github.com/Kwonym0814))** — Modeling & optimization. XGBoost surrogate hyperparameter search (Grid-search · Optuna) and model fine-tuning.
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
