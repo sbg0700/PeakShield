@@ -7,7 +7,7 @@
 A digital-twin simulation that takes 15-minute steel-process electricity data and, using
 **surrogate ML models + Bayesian optimization (Optuna)**, re-schedules motor/capacitor
 utilization to **minimize the electricity bill (base + energy + power-factor penalty) and
-CO₂ emissions**.
+peak demand**, with CO₂ tracked alongside on the dashboard.
 
 The whole analysis is packaged as a **reproducible Python pipeline** — reusable modules plus
 ordered entry-point scripts.
